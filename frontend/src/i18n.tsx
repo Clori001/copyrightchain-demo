@@ -89,15 +89,15 @@ const dictionary: Dictionary = {
   pendingReview: { en: "Pending Review", zh: "等待审核" },
   approved: { en: "Approved", zh: "审核通过" },
   approve: { en: "Approve", zh: "批准" },
-  bindWallet: { en: "Bind MetaMask Wallet", zh: "绑定 MetaMask 钱包" },
+  bindWallet: { en: "Use Visitor MetaMask", zh: "使用访客自己的 MetaMask" },
   bindWalletNote: {
-    en: "Submit an on-chain pending application from your own MetaMask wallet.",
-    zh: "使用你自己的 MetaMask 钱包提交链上待审核申请。"
+    en: "This only connects the visitor's browser wallet. It does not connect the reviewer wallet.",
+    zh: "这只会连接当前访客浏览器里的钱包，不会连接审核钱包。"
   },
-  websiteWallet: { en: "Use Website Wallet", zh: "使用网站钱包" },
+  websiteWallet: { en: "Submit Without Wallet", zh: "无钱包提交审核" },
   websiteWalletNote: {
-    en: "No MetaMask is needed for the visitor. The application is saved to the review queue, then the reviewer wallet registers and approves it on chain.",
-    zh: "访客不需要 MetaMask。申请会先进入审核队列，之后由审核钱包上链并批准。"
+    en: "No MetaMask is needed. The application goes to the review queue, then the reviewer approves it from the admin site.",
+    zh: "访客不需要 MetaMask。申请会进入审核队列，之后你在后台用审核钱包批准。"
   },
   deployDescription: {
     en: "Deploy with MetaMask. Your private key stays inside MetaMask and the deployed address is saved in this browser.",
