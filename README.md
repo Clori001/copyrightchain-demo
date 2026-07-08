@@ -77,7 +77,7 @@ If no contract address is configured, the UI still renders but chain write actio
 
 ## Public Domain Deployment
 
-The local URL `http://localhost:5173` only works on your own computer. To share the app with friends, deploy the `frontend/` folder to Vercel.
+The Vite dev URL only works on your own computer. To share the app with friends, deploy the `frontend/` folder to Vercel.
 
 Vercel settings:
 
@@ -153,11 +153,11 @@ VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_ANON_KEY=your-anon-public-key
 ```
 
-After this, `Use Website Wallet` submissions go to Supabase instead of browser-only local storage. The reviewer can open `/admin/review` and approve them with MetaMask.
+After this, `Use Website Wallet` submissions go to Supabase instead of browser-only storage. The reviewer can open the private admin deployment at `/admin/review` and approve them with MetaMask.
 
 The included Supabase policies are intentionally public for a university demo. For production, move approval updates behind a Supabase Edge Function that verifies a reviewer MetaMask signature.
 
-## MetaMask Deployment + Review Flow
+## Public Deployment + Review Flow
 
 Reviewer wallet:
 
@@ -165,14 +165,23 @@ Reviewer wallet:
 0x0Ec53965623c01C8C5a3af8F0d42Bb84cf7b837d
 ```
 
-1. Open `http://localhost:5173/admin/deploy`.
+Use two deployments from the same repository:
+
+```text
+Public site: https://your-public-domain.vercel.app
+Admin site:  https://your-admin-domain.vercel.app
+```
+
+1. Open `https://your-admin-domain.vercel.app/admin/deploy`.
 2. Connect MetaMask with the reviewer wallet.
 3. Click `Deploy with MetaMask` and approve the deployment transaction.
-4. The deployed contract address is saved in browser local storage.
-5. Open `http://localhost:5173/register`.
+4. Copy the deployed contract address into `VITE_CONTRACT_ADDRESS` for both Vercel deployments, then redeploy.
+5. Share `https://your-public-domain.vercel.app/register`.
 6. Users can choose:
    - `Bind MetaMask Wallet`: submit an on-chain pending application.
-   - `Use Website Wallet`: save a local pending application for reviewer approval.
-7. Open `http://localhost:5173/admin/review` with the reviewer wallet to approve applications.
+   - `Use Website Wallet`: submit a pending application to the Supabase review queue.
+7. Open `https://your-admin-domain.vercel.app/admin/review` with the reviewer wallet to approve applications.
 
 Only approved applications are shown as verified certificates.
+
+For local development, run `npm run dev` in `frontend/` and open the Vite dev URL printed in the terminal.
