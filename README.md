@@ -75,11 +75,11 @@ VITE_ENABLE_ADMIN=false
 
 If no contract address is configured, the UI still renders but chain write actions are disabled with a deployment notice.
 
-## Public Domain Deployment
+## Vercel Deployment
 
-The Vite dev URL only works on your own computer. To share the app with friends, deploy the `frontend/` folder to Vercel.
+The Vite dev URL only works on your own computer. To share the app with friends and keep review tools private, create two Vercel projects from the same GitHub repository.
 
-Vercel settings:
+Shared Vercel settings for both projects:
 
 ```text
 Framework Preset: Vite
@@ -89,7 +89,21 @@ Output Directory: dist
 Install Command: npm install
 ```
 
-Environment variables to add in Vercel:
+### Public Site
+
+Recommended project name:
+
+```text
+copyrightchain-public
+```
+
+Public URL example:
+
+```text
+https://copyrightchain-public.vercel.app
+```
+
+Environment variables:
 
 ```bash
 VITE_CONTRACT_ADDRESS=
@@ -103,8 +117,6 @@ VITE_SUPABASE_ANON_KEY=sb_publishable_cH80mg4w2dykFjeUSUPMtw_wYKFO4aN
 VITE_ENABLE_ADMIN=false
 ```
 
-After the smart contract is deployed, add its address to `VITE_CONTRACT_ADDRESS` and redeploy so public users can verify certificates.
-
 Public pages:
 
 ```text
@@ -114,18 +126,36 @@ Public pages:
 /explorer
 ```
 
-Create a second private admin deployment from the same `frontend/` folder if you want deploy/review on a separate site. Use the same Vercel settings, but set:
+The public site should keep `VITE_ENABLE_ADMIN=false`; admin routes are disabled there.
+
+### Admin Site
+
+Recommended project name:
+
+```text
+copyrightchain-admin
+```
+
+Admin URL example:
+
+```text
+https://copyrightchain-admin.vercel.app
+```
+
+Use the same shared Vercel settings and the same environment variables, but set:
 
 ```bash
 VITE_ENABLE_ADMIN=true
 ```
 
-Admin-only URLs on that private deployment:
+Admin-only pages:
 
 ```text
 /admin/deploy
 /admin/review
 ```
+
+After the smart contract is deployed from the admin site, add its address to `VITE_CONTRACT_ADDRESS` in both Vercel projects and redeploy both sites.
 
 ## Supabase Public Review Queue
 
