@@ -1,0 +1,17 @@
+{
+  "name": "copyrightchain-contract",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "compile": "HOME=$PWD/.home hardhat compile",
+    "test": "HOME=$PWD/.home hardhat test",
+    "export:frontend": "node scripts/export-frontend-artifact.js",
+    "deploy": "HOME=$PWD/.home hardhat run scripts/deploy.js",
+    "deploy:monad": "HOME=$PWD/.home hardhat run scripts/deploy.js --network monadTestnet"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "dotenv": "^16.4.7",
+    "hardhat": "^2.22.19"
+  }
+}
