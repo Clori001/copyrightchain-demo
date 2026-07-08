@@ -127,11 +127,13 @@ Public pages:
 Password-gated admin pages on the same site:
 
 ```text
-/admin/deploy
-/admin/review
+https://copyrightchain-public.vercel.app/admin/deploy
+https://copyrightchain-public.vercel.app/admin/review
 ```
 
-The admin password gate is only a lightweight demo barrier. Real approval is still protected by the reviewer MetaMask wallet. After the smart contract is deployed from `/admin/deploy`, add its address to `VITE_CONTRACT_ADDRESS` in Vercel and redeploy.
+The admin password gate is only a lightweight demo barrier. Real approval is still protected by the reviewer MetaMask wallet. If the Register page shows `Not deployed`, the wallet/network is not the problem; the public Vercel app still needs a contract address.
+
+Deploy the smart contract from `https://copyrightchain-public.vercel.app/admin/deploy`, then add the deployed address to `VITE_CONTRACT_ADDRESS` in Vercel and redeploy.
 
 ## Supabase Public Review Queue
 
@@ -174,19 +176,19 @@ Reviewer wallet:
 Use the same Vercel site for public use and password-gated admin access:
 
 ```text
-Site: https://your-domain.vercel.app
+Site: https://copyrightchain-public.vercel.app
 ```
 
-1. Open `https://your-domain.vercel.app/admin/deploy`.
+1. Open `https://copyrightchain-public.vercel.app/admin/deploy`.
 2. Enter the admin password.
 3. Connect MetaMask with the reviewer wallet.
 4. Click `Deploy with MetaMask` and approve the deployment transaction.
 5. Copy the deployed contract address into `VITE_CONTRACT_ADDRESS` in Vercel, then redeploy.
-6. Share `https://your-domain.vercel.app/register`.
+6. Share `https://copyrightchain-public.vercel.app/register`.
 7. Users can choose:
    - `Use Visitor MetaMask`: submit an on-chain pending application from the visitor wallet.
    - `Submit Without Wallet`: submit a pending application to the Supabase review queue.
-8. Open `https://your-domain.vercel.app/admin/review`, enter the admin password, and approve applications with the reviewer wallet.
+8. Open `https://copyrightchain-public.vercel.app/admin/review`, enter the admin password, and approve applications with the reviewer wallet.
 
 Only approved applications are shown as verified certificates.
 

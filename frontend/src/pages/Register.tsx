@@ -1,4 +1,4 @@
-import { CheckCircle2, CloudUpload, Loader2 } from "lucide-react";
+import { CheckCircle2, CloudUpload, Loader2, Wallet } from "lucide-react";
 import { ChangeEvent, DragEvent, FormEvent, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { HashDisplay } from "../components/HashDisplay";
@@ -50,7 +50,7 @@ export function Register() {
   const hasRequiredFields = Boolean(file && fileHash && title.trim() && category);
   const canRegister = Boolean(
     hasRequiredFields &&
-      (submissionMode === "website" || (isContractConfigured && (wallet.isConnected ? wallet.isCorrectNetwork : true)))
+      (submissionMode === "website" || (isContractConfigured && wallet.isConnected && wallet.isCorrectNetwork))
   );
 
   const filePreview = useMemo(
@@ -72,6 +72,10 @@ export function Register() {
     setFileHash("");
     setHashing(true);
     setError("");
+    setSuccessId(null);
+    setWebsiteSuccessId("");
+    setTransactionHash("");
+    setStage("idle");
 
     try {
       const [hash, preview] = await Promise.all([
@@ -283,7 +287,11 @@ export function Register() {
             </div>
           ) : null}
 
-          {fileHash ? <div className="mt-5"><HashDisplay hash={fileHash} /></div> : null}
+          {fileHash ? (
+            <div className="mt-5">
+              <HashDisplay hash={fileHash} copyable={Boolean(successId || websiteSuccessId)} />
+            </div>
+          ) : null}
         </section>
 
         <section className="panel p-5">
@@ -343,8 +351,20 @@ export function Register() {
 
           {submissionMode === "wallet" && !isContractConfigured ? (
             <p className="mt-4 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
-              Contract address is not configured. Deploy the contract first, then add the address to `deployment-info.json` or `VITE_CONTRACT_ADDRESS`.
+              {t("contractNotConfiguredRegister")}
             </p>
+          ) : null}
+
+          {submissionMode === "wallet" && !wallet.isConnected ? (
+            <div className="mt-4 rounded-lg border border-brand-100 bg-white p-4 text-sm text-ink-600">
+              <p className="font-semibold text-ink-900">{t("connectWalletToRegister")}</p>
+              <p className="mt-1 text-xs leading-5 text-ink-500">{t("visitorWalletConnectHint")}</p>
+              <button type="button" className="mt-3 btn-primary px-4 py-2 text-xs" onClick={() => void wallet.connectWallet()}>
+                <Wallet className="h-4 w-4" aria-hidden="true" />
+                {t("connectWallet")}
+              </button>
+              {wallet.error ? <p className="mt-3 text-xs text-red-600">{wallet.error}</p> : null}
+            </div>
           ) : null}
 
           {submissionMode === "wallet" && wallet.isConnected && !wallet.isCorrectNetwork ? (

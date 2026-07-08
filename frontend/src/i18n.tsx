@@ -18,6 +18,9 @@ const dictionary: Dictionary = {
   walletNotConnected: { en: "Wallet Not Connected", zh: "钱包未连接" },
   wrongNetwork: { en: "Wrong Network", zh: "网络错误" },
   switchNetwork: { en: "Switch Network", zh: "切换网络" },
+  copy: { en: "Copy", zh: "复制" },
+  copied: { en: "Copied", zh: "已复制" },
+  copyAvailableAfterSubmit: { en: "Copy after submission", zh: "提交成功后可复制" },
   demoVersion: { en: "Demo Version", zh: "测试版本" },
   demoNoticeShort: {
     en: "This application runs on a blockchain testnet. No real assets are involved.",
@@ -68,6 +71,15 @@ const dictionary: Dictionary = {
   hashExplanation: {
     en: "A hash is a unique digital fingerprint generated from your file. Any modification creates a different hash.",
     zh: "Hash 是文件唯一数字指纹。文件内容改变后，Hash 也会改变。"
+  },
+  connectWalletToRegister: { en: "Connect your wallet to continue", zh: "请先连接钱包再继续" },
+  visitorWalletConnectHint: {
+    en: "This connects the visitor's own MetaMask. After connecting, the registration transaction will be confirmed in that wallet.",
+    zh: "这里连接的是访客自己的 MetaMask。连接后，链上登记交易会在这个钱包里确认。"
+  },
+  contractNotConfiguredRegister: {
+    en: "Your wallet and network may be correct, but this site has no deployed contract address yet. Open Admin > Deploy, deploy the contract on Monad Testnet, then add the address to Vercel as VITE_CONTRACT_ADDRESS and redeploy.",
+    zh: "你的钱包和网络可以是正确的，但这个网站还没有配置已部署的合约地址。请打开后台 > 部署，在 Monad Testnet 部署合约，然后把合约地址填到 Vercel 的 VITE_CONTRACT_ADDRESS 并重新部署。"
   },
   workTitle: { en: "Work Title", zh: "作品名称" },
   category: { en: "Category", zh: "分类" },
