@@ -32,6 +32,9 @@ export function Navbar() {
       <NavLink className={linkClass} to="/explorer" onClick={() => setOpen(false)}>
         {t("explorer")}
       </NavLink>
+      <NavLink className={linkClass} to="/admin/review" onClick={() => setOpen(false)}>
+        {t("admin")}
+      </NavLink>
     </>
   );
 

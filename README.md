@@ -70,16 +70,16 @@ VITE_EXPLORER_URL=
 VITE_REVIEWER_ADDRESS=0x0Ec53965623c01C8C5a3af8F0d42Bb84cf7b837d
 VITE_SUPABASE_URL=
 VITE_SUPABASE_ANON_KEY=
-VITE_ENABLE_ADMIN=false
+VITE_ADMIN_PASSWORD_HASH=
 ```
 
 If no contract address is configured, the UI still renders but chain write actions are disabled with a deployment notice.
 
 ## Vercel Deployment
 
-The Vite dev URL only works on your own computer. To share the app with friends and keep review tools private, create two Vercel projects from the same GitHub repository.
+The Vite dev URL only works on your own computer. To share the app with friends, deploy the `frontend/` folder to Vercel.
 
-Shared Vercel settings for both projects:
+Vercel settings:
 
 ```text
 Framework Preset: Vite
@@ -88,8 +88,6 @@ Build Command: npm run build
 Output Directory: dist
 Install Command: npm install
 ```
-
-### Public Site
 
 Recommended project name:
 
@@ -114,7 +112,7 @@ VITE_EXPLORER_URL=
 VITE_REVIEWER_ADDRESS=0x0Ec53965623c01C8C5a3af8F0d42Bb84cf7b837d
 VITE_SUPABASE_URL=https://eqbdsxhwxbbhgvprmxyi.supabase.co
 VITE_SUPABASE_ANON_KEY=sb_publishable_cH80mg4w2dykFjeUSUPMtw_wYKFO4aN
-VITE_ENABLE_ADMIN=false
+VITE_ADMIN_PASSWORD_HASH=
 ```
 
 Public pages:
@@ -126,36 +124,14 @@ Public pages:
 /explorer
 ```
 
-The public site should keep `VITE_ENABLE_ADMIN=false`; admin routes are disabled there.
-
-### Admin Site
-
-Recommended project name:
-
-```text
-copyrightchain-admin
-```
-
-Admin URL example:
-
-```text
-https://copyrightchain-admin.vercel.app
-```
-
-Use the same shared Vercel settings and the same environment variables, but set:
-
-```bash
-VITE_ENABLE_ADMIN=true
-```
-
-Admin-only pages:
+Password-gated admin pages on the same site:
 
 ```text
 /admin/deploy
 /admin/review
 ```
 
-After the smart contract is deployed from the admin site, add its address to `VITE_CONTRACT_ADDRESS` in both Vercel projects and redeploy both sites.
+The admin password gate is only a lightweight demo barrier. Real approval is still protected by the reviewer MetaMask wallet. After the smart contract is deployed from `/admin/deploy`, add its address to `VITE_CONTRACT_ADDRESS` in Vercel and redeploy.
 
 ## Supabase Public Review Queue
 
@@ -183,7 +159,7 @@ VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_ANON_KEY=your-anon-public-key
 ```
 
-After this, `Use Website Wallet` submissions go to Supabase instead of browser-only storage. The reviewer can open the private admin deployment at `/admin/review` and approve them with MetaMask.
+After this, `Submit Without Wallet` submissions go to Supabase instead of browser-only storage. The reviewer can open `/admin/review`, enter the admin password, and approve them with MetaMask.
 
 The included Supabase policies are intentionally public for a university demo. For production, move approval updates behind a Supabase Edge Function that verifies a reviewer MetaMask signature.
 
@@ -195,22 +171,22 @@ Reviewer wallet:
 0x0Ec53965623c01C8C5a3af8F0d42Bb84cf7b837d
 ```
 
-Use two deployments from the same repository:
+Use the same Vercel site for public use and password-gated admin access:
 
 ```text
-Public site: https://your-public-domain.vercel.app
-Admin site:  https://your-admin-domain.vercel.app
+Site: https://your-domain.vercel.app
 ```
 
-1. Open `https://your-admin-domain.vercel.app/admin/deploy`.
-2. Connect MetaMask with the reviewer wallet.
-3. Click `Deploy with MetaMask` and approve the deployment transaction.
-4. Copy the deployed contract address into `VITE_CONTRACT_ADDRESS` for both Vercel deployments, then redeploy.
-5. Share `https://your-public-domain.vercel.app/register`.
-6. Users can choose:
-   - `Bind MetaMask Wallet`: submit an on-chain pending application.
-   - `Use Website Wallet`: submit a pending application to the Supabase review queue.
-7. Open `https://your-admin-domain.vercel.app/admin/review` with the reviewer wallet to approve applications.
+1. Open `https://your-domain.vercel.app/admin/deploy`.
+2. Enter the admin password.
+3. Connect MetaMask with the reviewer wallet.
+4. Click `Deploy with MetaMask` and approve the deployment transaction.
+5. Copy the deployed contract address into `VITE_CONTRACT_ADDRESS` in Vercel, then redeploy.
+6. Share `https://your-domain.vercel.app/register`.
+7. Users can choose:
+   - `Use Visitor MetaMask`: submit an on-chain pending application from the visitor wallet.
+   - `Submit Without Wallet`: submit a pending application to the Supabase review queue.
+8. Open `https://your-domain.vercel.app/admin/review`, enter the admin password, and approve applications with the reviewer wallet.
 
 Only approved applications are shown as verified certificates.
 

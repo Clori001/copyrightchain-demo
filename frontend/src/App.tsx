@@ -1,5 +1,6 @@
 import { lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
+import { AdminGate } from "./components/AdminGate";
 import { Footer } from "./components/Footer";
 import { Navbar } from "./components/Navbar";
 import { Certificate } from "./pages/Certificate";
@@ -12,7 +13,6 @@ import { Verify } from "./pages/Verify";
 
 const Deploy = lazy(() => import("./pages/Deploy").then((module) => ({ default: module.Deploy })));
 const Review = lazy(() => import("./pages/Review").then((module) => ({ default: module.Review })));
-const ENABLE_ADMIN = import.meta.env.VITE_ENABLE_ADMIN === "true";
 
 export default function App() {
   return (
@@ -27,26 +27,32 @@ export default function App() {
           <Route path="/verify" element={<Verify />} />
           <Route path="/verify/:id" element={<Verify />} />
           <Route path="/explorer" element={<Explorer />} />
-          {ENABLE_ADMIN ? (
-            <>
-              <Route
-                path="/admin/deploy"
-                element={
-                  <Suspense fallback={<main className="page-shell">Loading admin...</main>}>
-                    <Deploy />
-                  </Suspense>
-                }
-              />
-              <Route
-                path="/admin/review"
-                element={
-                  <Suspense fallback={<main className="page-shell">Loading admin...</main>}>
-                    <Review />
-                  </Suspense>
-                }
-              />
-            </>
-          ) : null}
+          <Route
+            path="/admin/deploy"
+            element={
+              <AdminGate>
+                <Suspense fallback={<main className="page-shell">Loading admin...</main>}>
+                  <Deploy />
+                </Suspense>
+              </AdminGate>
+            }
+          />
+          <Route
+            path="/admin/review"
+            element={
+              <AdminGate>
+                <Suspense fallback={<main className="page-shell">Loading admin...</main>}>
+                  <Review />
+                </Suspense>
+              </AdminGate>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <Navigate to="/admin/review" replace />
+            }
+          />
           <Route path="/transaction/:hash" element={<Transaction />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
