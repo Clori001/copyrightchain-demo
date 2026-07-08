@@ -70,6 +70,7 @@ const dictionary: Dictionary = {
   },
   workTitle: { en: "Work Title", zh: "作品名称" },
   category: { en: "Category", zh: "分类" },
+  selectCategory: { en: "Select a category", zh: "请选择分类" },
   description: { en: "Description", zh: "描述" },
   externalLink: { en: "External Link (Optional)", zh: "外部链接（可选）" },
   registrationPreview: { en: "Registration Preview", zh: "登记预览" },

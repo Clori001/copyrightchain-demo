@@ -34,10 +34,10 @@ export function Register() {
   const [previewDataUrl, setPreviewDataUrl] = useState<string | undefined>();
   const [fileHash, setFileHash] = useState("");
   const [hashing, setHashing] = useState(false);
-  const [title, setTitle] = useState("Sunset at Mountain Lake");
-  const [category, setCategory] = useState("Photography");
-  const [description, setDescription] = useState("A beautiful sunset view captured at the mountain lake during my trip.");
-  const [externalURL, setExternalURL] = useState("https://example.com/sunset-at-mountain-lake");
+  const [title, setTitle] = useState("");
+  const [category, setCategory] = useState("");
+  const [description, setDescription] = useState("");
+  const [externalURL, setExternalURL] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [stage, setStage] = useState<TransactionStage>("idle");
   const [transactionHash, setTransactionHash] = useState("");
@@ -296,6 +296,9 @@ export function Register() {
             <label>
               <span className="label">{t("category")} *</span>
               <select className="input" value={category} onChange={(event) => setCategory(event.target.value)}>
+                <option value="" disabled>
+                  {t("selectCategory")}
+                </option>
                 {categories.map((item) => (
                   <option key={item} value={item}>
                     {item}
@@ -320,7 +323,7 @@ export function Register() {
             <h3 className="font-bold text-ink-900">{t("registrationPreview")}</h3>
             <div className="mt-3 grid gap-3 text-sm sm:grid-cols-2">
               <PreviewRow label={t("workTitle")} value={title || "Untitled"} />
-              <PreviewRow label={t("category")} value={category} />
+              <PreviewRow label={t("category")} value={category || t("selectCategory")} />
               <PreviewRow label={t("fileHash")} value={fileHash ? formatHash(fileHash) : "Upload a file first"} />
               <PreviewRow label={t("network")} value={NETWORK_NAME} />
               <PreviewRow label={t("smartContract")} value={CONTRACT_ADDRESS ? formatAddress(CONTRACT_ADDRESS) : t("notDeployed")} />
