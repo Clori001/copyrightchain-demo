@@ -9,7 +9,8 @@ import { useWallet } from "../hooks/useWallet";
 import { useTranslation } from "../i18n";
 import type { CopyrightRecord, WebsiteApplication, WebsiteApplicationStatus } from "../types/copyright";
 import { formatCertificateId, formatDate } from "../utils/certificate";
-import { getPreview, getWebsiteApplications } from "../utils/localPreview";
+import { getPreview, getWebsiteApplications, updateWebsiteApplication } from "../utils/localPreview";
+import { isSupabaseConfigured, listSupabaseApplications } from "../utils/supabaseApplications";
 
 const filters = ["All Works", "Photography", "Image", "Music", "Writing", "Code", "Design", "Other"];
 
@@ -23,6 +24,24 @@ export function MyWorks() {
   const [error, setError] = useState("");
   const [websiteApplications, setWebsiteApplications] = useState<WebsiteApplication[]>([]);
 
+  const filteredWebsiteApplications = useMemo(() => {
+    if (filter === "All Works") {
+      return websiteApplications;
+    }
+
+    return websiteApplications.filter((application) => application.category === filter);
+  }, [filter, websiteApplications]);
+
+  const pendingApplications = useMemo(
+    () => filteredWebsiteApplications.filter((application) => application.status === "pending"),
+    [filteredWebsiteApplications]
+  );
+
+  const approvedApplications = useMemo(
+    () => filteredWebsiteApplications.filter((application) => application.status === "approved"),
+    [filteredWebsiteApplications]
+  );
+
   const filteredRecords = useMemo(() => {
     if (filter === "All Works") {
       return records;
@@ -31,8 +50,43 @@ export function MyWorks() {
     return records.filter((record) => record.category === filter);
   }, [filter, records]);
 
+  async function loadWebsiteApplications() {
+    const localApplications = getWebsiteApplications();
+
+    if (!isSupabaseConfigured || !localApplications.length) {
+      return localApplications;
+    }
+
+    try {
+      const remoteApplications = await listSupabaseApplications();
+      const remoteById = new Map(remoteApplications.map((application) => [application.localId, application]));
+
+      return localApplications.map((localApplication) => {
+        const remoteApplication = remoteById.get(localApplication.localId);
+
+        if (!remoteApplication) {
+          return localApplication;
+        }
+
+        const syncedApplication = {
+          ...localApplication,
+          status: remoteApplication.status,
+          certificateId: remoteApplication.certificateId,
+          transactionHash: remoteApplication.transactionHash,
+          storage: remoteApplication.storage,
+          createdAt: remoteApplication.createdAt
+        };
+
+        updateWebsiteApplication(localApplication.localId, syncedApplication);
+        return syncedApplication;
+      });
+    } catch {
+      return localApplications;
+    }
+  }
+
   async function loadRecords() {
-    setWebsiteApplications(getWebsiteApplications());
+    setWebsiteApplications(await loadWebsiteApplications());
 
     if (!wallet.isConnected || !isContractConfigured) {
       return;
@@ -63,7 +117,7 @@ export function MyWorks() {
           <h1 className="text-3xl font-bold text-ink-900">{t("myRecords")}</h1>
           <p className="mt-2 text-sm text-ink-500">{t("myRecordsSubtitle")}</p>
         </div>
-        <button type="button" className="btn-secondary px-4 py-2 text-xs" onClick={() => void loadRecords()} disabled={!wallet.isConnected || loading}>
+        <button type="button" className="btn-secondary px-4 py-2 text-xs" onClick={() => void loadRecords()} disabled={loading}>
           <RefreshCcw className="h-4 w-4" />
           {t("refresh")}
         </button>
@@ -84,46 +138,31 @@ export function MyWorks() {
         ))}
       </div>
 
-      {websiteApplications.length ? (
-        <section className="mb-6">
-          <h2 className="mb-3 text-lg font-bold text-ink-900">{t("websiteWallet")} · {t("browserApplications")}</h2>
+      <section className="mb-8">
+        <h2 className="mb-3 text-lg font-bold text-ink-900">{t("myPendingApplications")}</h2>
+        {pendingApplications.length ? (
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {websiteApplications.map((application) => (
-              <article key={application.localId} className="panel grid gap-4 p-4 sm:grid-cols-[130px_1fr]">
-                <WorkPreview
-                  category={application.category}
-                  preview={{
-                    id: 0,
-                    fileName: application.fileName,
-                    fileType: application.fileType,
-                    fileSize: application.fileSize,
-                    dataUrl: application.previewDataUrl
-                  }}
-                  alt={application.title}
-                  size="sm"
-                />
-                <div className="min-w-0">
-                  <h3 className="truncate font-bold text-ink-900">{application.title}</h3>
-                  <p className="mt-1 text-sm text-ink-500">{application.category}</p>
-                  <p className="mt-2 text-xs text-ink-500">Local ID: {application.localId.slice(0, 8)}</p>
-                  <div className="mt-4 flex items-center justify-between gap-3">
-                    <ApplicationStatusBadge status={application.status} />
-                    {application.certificateId ? (
-                      <Link className="btn-secondary px-3 py-1.5 text-xs" to={`/certificate/${formatCertificateId(application.certificateId)}`}>
-                        {t("viewCertificate")}
-                      </Link>
-                    ) : (
-                      <span className="text-xs font-semibold text-ink-500">
-                        {application.status === "rejected" ? t("rejected") : t("waitingReviewer")}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </article>
+            {pendingApplications.map((application) => (
+              <WebsiteApplicationCard key={application.localId} application={application} />
             ))}
           </div>
-        </section>
-      ) : null}
+        ) : (
+          <EmptySection text={t("noPendingApplications")} />
+        )}
+      </section>
+
+      <section className="mb-8">
+        <h2 className="mb-3 text-lg font-bold text-ink-900">{t("myApprovedProjects")}</h2>
+        {approvedApplications.length ? (
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {approvedApplications.map((application) => (
+              <WebsiteApplicationCard key={application.localId} application={application} />
+            ))}
+          </div>
+        ) : (
+          <EmptySection text={t("noApprovedProjects")} />
+        )}
+      </section>
 
       <div className="mb-3">
         <h2 className="text-lg font-bold text-ink-900">{t("onchainWalletRecords")}</h2>
@@ -181,6 +220,48 @@ export function MyWorks() {
       )}
     </div>
   );
+}
+
+function WebsiteApplicationCard({ application }: { application: WebsiteApplication }) {
+  const { t } = useTranslation();
+
+  return (
+    <article className="panel grid gap-4 p-4 sm:grid-cols-[130px_1fr]">
+      <WorkPreview
+        category={application.category}
+        preview={{
+          id: 0,
+          fileName: application.fileName,
+          fileType: application.fileType,
+          fileSize: application.fileSize,
+          dataUrl: application.previewDataUrl
+        }}
+        alt={application.title}
+        size="sm"
+      />
+      <div className="min-w-0">
+        <h3 className="truncate font-bold text-ink-900">{application.title}</h3>
+        <p className="mt-1 text-sm text-ink-500">{application.category}</p>
+        <p className="mt-2 text-xs text-ink-500">Local ID: {application.localId.slice(0, 8)}</p>
+        <div className="mt-4 flex items-center justify-between gap-3">
+          <ApplicationStatusBadge status={application.status} />
+          {application.certificateId ? (
+            <Link className="btn-secondary px-3 py-1.5 text-xs" to={`/certificate/${formatCertificateId(application.certificateId)}`}>
+              {t("viewCertificate")}
+            </Link>
+          ) : (
+            <span className="text-xs font-semibold text-ink-500">
+              {application.status === "rejected" ? t("rejected") : t("waitingReviewer")}
+            </span>
+          )}
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function EmptySection({ text }: { text: string }) {
+  return <div className="panel p-5 text-sm text-ink-500">{text}</div>;
 }
 
 function ApplicationStatusBadge({ status }: { status: WebsiteApplicationStatus }) {

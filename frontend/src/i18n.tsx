@@ -56,6 +56,33 @@ const dictionary: Dictionary = {
     en: "Create a verifiable blockchain record for your digital works.",
     zh: "通过区块链为你的数字作品创建可验证、不可篡改的登记记录。"
   },
+  projectIntroTitle: { en: "What This Project Demonstrates", zh: "这个项目在演示什么" },
+  projectIntroSubtitle: {
+    en: "CopyrightChain is a learning demo: it creates a local file fingerprint, records copyright metadata on Monad Testnet, and lets anyone verify the result.",
+    zh: "CopyrightChain 是一个学习展示项目：在本地生成文件指纹，把版权信息登记到 Monad Testnet，并让任何人都能验证结果。"
+  },
+  projectIntroWorkTitle: { en: "Digital Work Proof", zh: "数字作品证明" },
+  projectIntroWorkBody: {
+    en: "The file itself is not uploaded to the blockchain. The site generates a SHA-256 hash in the browser and uses that hash as the proof fingerprint.",
+    zh: "文件本身不会上传到区块链。网站在浏览器里生成 SHA-256 Hash，并把这个 Hash 作为作品指纹。"
+  },
+  projectIntroBlockchainTitle: { en: "Blockchain Network", zh: "区块链网络" },
+  projectIntroBlockchainBody: {
+    en: "The demo runs on Monad Testnet, so transactions are public and verifiable but do not involve real assets.",
+    zh: "本 demo 运行在 Monad Testnet，交易公开可验证，但不涉及真实资产。"
+  },
+  projectIntroContractTitle: { en: "Deployed Smart Contract", zh: "已部署智能合约" },
+  projectIntroContractBody: {
+    en: "A Solidity contract stores the registration ID, creator wallet, title, category, file hash, timestamp, and approval status.",
+    zh: "Solidity 合约保存登记编号、创建钱包、作品名、分类、文件 Hash、时间和审核状态。"
+  },
+  projectIntroDatabaseTitle: { en: "Database & Review Queue", zh: "数据库与审核队列" },
+  projectIntroDatabaseBody: {
+    en: "Wallet-free submissions are saved in Supabase for reviewer approval. Browser local storage is only used for local history and previews.",
+    zh: "无钱包提交会保存到 Supabase 等待审核。本地浏览器缓存只用于本机历史记录和预览。"
+  },
+  supabaseEnabled: { en: "Supabase enabled", zh: "Supabase 已启用" },
+  browserFallback: { en: "Browser-only fallback", zh: "仅本地浏览器缓存" },
   createProof: {
     en: "Create a blockchain-based proof for your digital work.",
     zh: "为你的数字作品创建链上证明。"
@@ -178,10 +205,14 @@ const dictionary: Dictionary = {
     zh: "查看本浏览器提交记录，以及当前连接钱包创建的链上记录。"
   },
   browserApplications: { en: "This Browser's Applications", zh: "本浏览器提交记录" },
-  onchainWalletRecords: { en: "On-chain Records Created by Connected Wallet", zh: "当前钱包创建的链上记录" },
+  myPendingApplications: { en: "My Pending Applications", zh: "我的待审核申请" },
+  myApprovedProjects: { en: "My Approved Projects", zh: "我的已通过项目" },
+  noPendingApplications: { en: "No pending applications from this browser.", zh: "本浏览器暂无待审核申请。" },
+  noApprovedProjects: { en: "No approved projects from this browser yet.", zh: "本浏览器暂无已通过项目。" },
+  onchainWalletRecords: { en: "All Projects From This Wallet", zh: "此钱包所有项目" },
   onchainWalletRecordsHint: {
-    en: "If you approve wallet-free submissions with the reviewer wallet, those on-chain records are created by the reviewer wallet and appear here.",
-    zh: "如果你用审核钱包批准无钱包申请，链上创建者就是审核钱包，所以这些记录会显示在这里。"
+    en: "This section reads the smart contract for the connected MetaMask wallet. If the reviewer wallet approves wallet-free submissions, those on-chain records belong to the reviewer wallet.",
+    zh: "这里直接按当前连接的 MetaMask 钱包读取智能合约。如果审核钱包批准无钱包申请，这些链上记录会归到审核钱包名下。"
   },
   noRecords: { en: "No copyright records yet.", zh: "暂无版权记录。" },
   startFirst: { en: "Start your first registration.", zh: "创建你的第一个登记。" },

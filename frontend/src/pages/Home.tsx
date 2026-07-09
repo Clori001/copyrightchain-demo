@@ -1,12 +1,15 @@
-import { ArrowRight, FileCheck2, Fingerprint, Globe2, ShieldCheck, UploadCloud, UsersRound } from "lucide-react";
+import { ArrowRight, Database, FileCheck2, Fingerprint, Globe2, ShieldCheck, UploadCloud, UsersRound } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import heroIllustration from "../assets/hero-illustration.svg";
 import { NetworkBadge } from "../components/NetworkBadge";
-import { NETWORK_NAME, isContractConfigured } from "../contract/address";
+import { CONTRACT_ADDRESS, NETWORK_NAME, isContractConfigured } from "../contract/address";
 import { useCopyright } from "../hooks/useCopyright";
 import { useTranslation } from "../i18n";
 import type { CopyrightRecord } from "../types/copyright";
+import { formatAddress } from "../utils/formatAddress";
+import { isSupabaseConfigured } from "../utils/supabaseApplications";
 
 export function Home() {
   const { t } = useTranslation();
@@ -99,6 +102,38 @@ export function Home() {
       </section>
 
       <section className="mt-8">
+        <div className="max-w-3xl">
+          <h2 className="text-xl font-bold text-ink-900">{t("projectIntroTitle")}</h2>
+          <p className="mt-2 text-sm leading-6 text-ink-500">{t("projectIntroSubtitle")}</p>
+        </div>
+        <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <InfoCard
+            icon={FileCheck2}
+            title={t("projectIntroWorkTitle")}
+            body={t("projectIntroWorkBody")}
+          />
+          <InfoCard
+            icon={Globe2}
+            title={t("projectIntroBlockchainTitle")}
+            body={t("projectIntroBlockchainBody")}
+            meta={NETWORK_NAME}
+          />
+          <InfoCard
+            icon={ShieldCheck}
+            title={t("projectIntroContractTitle")}
+            body={t("projectIntroContractBody")}
+            meta={CONTRACT_ADDRESS ? formatAddress(CONTRACT_ADDRESS) : t("notDeployed")}
+          />
+          <InfoCard
+            icon={Database}
+            title={t("projectIntroDatabaseTitle")}
+            body={t("projectIntroDatabaseBody")}
+            meta={isSupabaseConfigured ? t("supabaseEnabled") : t("browserFallback")}
+          />
+        </div>
+      </section>
+
+      <section className="mt-8">
         <div className="mb-4 flex items-center justify-between gap-4">
           <h2 className="text-xl font-bold text-ink-900">{t("blockchainOverview")}</h2>
           {!isContractConfigured ? <span className="text-sm font-medium text-amber-700">{t("notDeployed")}</span> : null}
@@ -120,6 +155,29 @@ export function Home() {
         </div>
       </section>
     </div>
+  );
+}
+
+function InfoCard({
+  icon: Icon,
+  title,
+  body,
+  meta
+}: {
+  icon: LucideIcon;
+  title: string;
+  body: string;
+  meta?: string;
+}) {
+  return (
+    <article className="panel p-5">
+      <div className="flex h-11 w-11 items-center justify-center rounded-md border border-brand-100 bg-brand-50 text-brand-600">
+        <Icon className="h-5 w-5" aria-hidden="true" />
+      </div>
+      <h3 className="mt-4 font-bold text-ink-900">{title}</h3>
+      <p className="mt-2 text-sm leading-6 text-ink-500">{body}</p>
+      {meta ? <p className="mt-3 break-all text-xs font-semibold text-brand-700">{meta}</p> : null}
+    </article>
   );
 }
 
