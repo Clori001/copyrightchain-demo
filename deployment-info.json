@@ -1,7 +1,7 @@
 {
   "contractName": "CopyrightRegistry",
   "network": "Monad Testnet",
-  "contractAddress": "",
+  "contractAddress": "0x2427B33D5EcfD113013feDC772AF48083a3fA26b",
   "deploymentTransaction": "",
   "chainId": "10143",
   "reviewerAddress": "0x0Ec53965623c01C8C5a3af8F0d42Bb84cf7b837d"
