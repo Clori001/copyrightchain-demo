@@ -4,7 +4,7 @@ Public demo / 公开网站: https://copyrightchain-public.vercel.app/
 
 CopyrightChain is a university Web3 mini demo for blockchain-based digital copyright registration on Monad Testnet.
 
-CopyrightChain 是一个运行在 Monad Testnet 上的大学 Web3 mini demo，用于演示数字作品版权登记、审核和公开验证流程。
+CopyrightChain 是一个运行在 Monad Testnet 上的 Web3 mini demo，通过部署智能合约，用于演示数字作品版权登记、审核和公开验证流程。
 
 It demonstrates how a creator can:
 
