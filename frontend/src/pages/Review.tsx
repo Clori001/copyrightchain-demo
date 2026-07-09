@@ -1,4 +1,4 @@
-import { CircleAlert, Loader2, RefreshCcw, ShieldCheck } from "lucide-react";
+import { CircleAlert, Loader2, RefreshCcw, ShieldCheck, XCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { WorkPreview } from "../components/WorkPreview";
@@ -145,6 +145,35 @@ export function Review() {
     }
   }
 
+  async function rejectWebsiteApplication(application: WebsiteApplication) {
+    if (!window.confirm(t("confirmReject"))) {
+      return;
+    }
+
+    setError("");
+    setProcessingId(`reject-${application.localId}`);
+
+    try {
+      if (application.storage === "supabase") {
+        await updateSupabaseApplication(application.localId, {
+          status: "rejected",
+          reviewerWallet: wallet.account
+        });
+      } else {
+        updateWebsiteApplication(application.localId, {
+          status: "rejected"
+        });
+      }
+
+      await loadReviewQueue();
+    } catch (rejectError) {
+      setError(rejectError instanceof Error ? rejectError.message : "Reject failed.");
+    } finally {
+      setProcessingId("");
+      setStage("idle");
+    }
+  }
+
   return (
     <div className="page-shell">
       <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
@@ -257,15 +286,26 @@ export function Review() {
                           Local ID {application.localId.slice(0, 8)} · {application.category}
                         </p>
                         <p className="mt-2 break-all text-xs text-ink-500">Hash: {formatHash(application.fileHash)}</p>
-                        <button
-                          type="button"
-                          className="mt-4 btn-primary px-4 py-2 text-xs"
-                          disabled={!isContractConfigured || processingId === `website-${application.localId}`}
-                          onClick={() => void approveWebsiteApplication(application)}
-                        >
-                          {processingId === `website-${application.localId}` ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
-                          {t("approveAndRegister")}
-                        </button>
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          <button
+                            type="button"
+                            className="btn-primary px-4 py-2 text-xs"
+                            disabled={!isContractConfigured || Boolean(processingId)}
+                            onClick={() => void approveWebsiteApplication(application)}
+                          >
+                            {processingId === `website-${application.localId}` ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
+                            {t("approveAndRegister")}
+                          </button>
+                          <button
+                            type="button"
+                            className="btn-danger px-4 py-2 text-xs"
+                            disabled={Boolean(processingId)}
+                            onClick={() => void rejectWebsiteApplication(application)}
+                          >
+                            {processingId === `reject-${application.localId}` ? <Loader2 className="h-4 w-4 animate-spin" /> : <XCircle className="h-4 w-4" />}
+                            {t("reject")}
+                          </button>
+                        </div>
                       </div>
                     </article>
                   ))}

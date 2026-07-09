@@ -10,13 +10,20 @@ create table if not exists public.copyright_applications (
   file_name text not null default '',
   file_type text not null default '',
   file_size bigint not null default 0,
-  status text not null default 'pending' check (status in ('pending', 'approved')),
+  status text not null default 'pending',
   certificate_id bigint,
   transaction_hash text,
   reviewer_wallet text,
   created_at timestamptz not null default now(),
   approved_at timestamptz
 );
+
+alter table public.copyright_applications
+drop constraint if exists copyright_applications_status_check;
+
+alter table public.copyright_applications
+add constraint copyright_applications_status_check
+check (status in ('pending', 'approved', 'rejected'));
 
 alter table public.copyright_applications enable row level security;
 
@@ -49,9 +56,8 @@ for update
 to anon, authenticated
 using (true)
 with check (
-  status in ('pending', 'approved')
+  status in ('pending', 'approved', 'rejected')
 );
 
 create index if not exists copyright_applications_status_created_idx
 on public.copyright_applications (status, created_at desc);
-

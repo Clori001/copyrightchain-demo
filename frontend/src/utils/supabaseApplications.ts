@@ -1,4 +1,4 @@
-import type { WebsiteApplication } from "../types/copyright";
+import type { WebsiteApplication, WebsiteApplicationStatus } from "../types/copyright";
 
 interface SupabaseApplicationRow {
   id: string;
@@ -10,7 +10,7 @@ interface SupabaseApplicationRow {
   file_name: string;
   file_type: string;
   file_size: number;
-  status: "pending" | "approved";
+  status: WebsiteApplicationStatus;
   certificate_id: number | null;
   transaction_hash: string | null;
   reviewer_wallet: string | null;
@@ -115,7 +115,7 @@ export async function saveSupabaseApplication(
 export async function updateSupabaseApplication(
   id: string,
   update: {
-    status?: "pending" | "approved";
+    status?: WebsiteApplicationStatus;
     certificateId?: number;
     transactionHash?: string;
     reviewerWallet?: string;
@@ -138,4 +138,3 @@ export async function updateSupabaseApplication(
 
   return rows[0] ? toApplication(rows[0]) : null;
 }
-

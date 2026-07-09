@@ -7,7 +7,7 @@ import { isContractConfigured } from "../contract/address";
 import { useCopyright } from "../hooks/useCopyright";
 import { useWallet } from "../hooks/useWallet";
 import { useTranslation } from "../i18n";
-import type { CopyrightRecord, WebsiteApplication } from "../types/copyright";
+import type { CopyrightRecord, WebsiteApplication, WebsiteApplicationStatus } from "../types/copyright";
 import { formatCertificateId, formatDate } from "../utils/certificate";
 import { getPreview, getWebsiteApplications } from "../utils/localPreview";
 
@@ -86,7 +86,7 @@ export function MyWorks() {
 
       {websiteApplications.length ? (
         <section className="mb-6">
-          <h2 className="mb-3 text-lg font-bold text-ink-900">{t("websiteWallet")} · Your Browser Applications</h2>
+          <h2 className="mb-3 text-lg font-bold text-ink-900">{t("websiteWallet")} · {t("browserApplications")}</h2>
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {websiteApplications.map((application) => (
               <article key={application.localId} className="panel grid gap-4 p-4 sm:grid-cols-[130px_1fr]">
@@ -107,13 +107,15 @@ export function MyWorks() {
                   <p className="mt-1 text-sm text-ink-500">{application.category}</p>
                   <p className="mt-2 text-xs text-ink-500">Local ID: {application.localId.slice(0, 8)}</p>
                   <div className="mt-4 flex items-center justify-between gap-3">
-                    <StatusBadge approved={application.status === "approved"} />
+                    <ApplicationStatusBadge status={application.status} />
                     {application.certificateId ? (
                       <Link className="btn-secondary px-3 py-1.5 text-xs" to={`/certificate/${formatCertificateId(application.certificateId)}`}>
                         {t("viewCertificate")}
                       </Link>
                     ) : (
-                      <span className="text-xs font-semibold text-ink-500">Waiting reviewer</span>
+                      <span className="text-xs font-semibold text-ink-500">
+                        {application.status === "rejected" ? t("rejected") : t("waitingReviewer")}
+                      </span>
                     )}
                   </div>
                 </div>
@@ -123,7 +125,10 @@ export function MyWorks() {
         </section>
       ) : null}
 
-      <h2 className="mb-3 text-lg font-bold text-ink-900">On-chain Wallet Records</h2>
+      <div className="mb-3">
+        <h2 className="text-lg font-bold text-ink-900">{t("onchainWalletRecords")}</h2>
+        <p className="mt-1 text-xs leading-5 text-ink-500">{t("onchainWalletRecordsHint")}</p>
+      </div>
 
       {!isContractConfigured ? (
         <Notice text="Contract address is not configured. Deploy the contract first to read wallet records." />
@@ -155,7 +160,7 @@ export function MyWorks() {
                   </div>
                 </dl>
                 <div className="mt-4 flex items-center justify-between gap-3">
-                  <StatusBadge approved={record.approved} />
+                  <ChainStatusBadge approved={record.approved} />
                   <Link className="btn-secondary px-3 py-1.5 text-xs" to={`/certificate/${formatCertificateId(record.id)}`}>
                     {t("viewCertificate")}
                   </Link>
@@ -178,7 +183,22 @@ export function MyWorks() {
   );
 }
 
-function StatusBadge({ approved }: { approved: boolean }) {
+function ApplicationStatusBadge({ status }: { status: WebsiteApplicationStatus }) {
+  const { t } = useTranslation();
+
+  const className =
+    status === "approved"
+      ? "bg-emerald-50 text-emerald-700"
+      : status === "rejected"
+        ? "bg-red-50 text-red-700"
+        : "bg-amber-50 text-amber-700";
+
+  const label = status === "approved" ? t("approved") : status === "rejected" ? t("rejected") : t("pendingReview");
+
+  return <span className={`rounded-md px-3 py-1 text-xs font-bold ${className}`}>{label}</span>;
+}
+
+function ChainStatusBadge({ approved }: { approved: boolean }) {
   const { t } = useTranslation();
 
   return (

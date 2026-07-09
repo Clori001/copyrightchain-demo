@@ -10,7 +10,7 @@ const dictionary: Dictionary = {
   register: { en: "Register Copyright", zh: "登记版权" },
   myWorks: { en: "My Works", zh: "我的作品" },
   verify: { en: "Verify Copyright", zh: "验证版权" },
-  explorer: { en: "Explorer", zh: "浏览器" },
+  explorer: { en: "Discover", zh: "发现" },
   admin: { en: "Admin", zh: "后台" },
   review: { en: "Review", zh: "审核" },
   deploy: { en: "Deploy", zh: "部署" },
@@ -35,6 +35,8 @@ const dictionary: Dictionary = {
   creators: { en: "Creators", zh: "创作者数量" },
   totalWorks: { en: "Total Works", zh: "作品总数" },
   latestRegistration: { en: "Latest Registration", zh: "最新登记" },
+  thisWeek: { en: "this week", zh: "本周" },
+  uniqueWallets: { en: "Unique wallets", zh: "唯一钱包" },
   blockchainOverview: { en: "Blockchain Overview", zh: "区块链状态" },
   howItWorks: { en: "How It Works", zh: "工作流程" },
   uploadWork: { en: "Upload Your Work", zh: "上传作品" },
@@ -102,6 +104,12 @@ const dictionary: Dictionary = {
   pendingReview: { en: "Pending Review", zh: "等待审核" },
   approved: { en: "Approved", zh: "审核通过" },
   approve: { en: "Approve", zh: "批准" },
+  reject: { en: "Reject", zh: "拒绝" },
+  rejected: { en: "Rejected", zh: "已拒绝" },
+  confirmReject: {
+    en: "Reject this application? It will be removed from the pending review list.",
+    zh: "确定拒绝这个申请吗？它会从待审核列表中移除。"
+  },
   bindWallet: { en: "Use Visitor MetaMask", zh: "使用访客自己的 MetaMask" },
   bindWalletNote: {
     en: "This only connects the visitor's browser wallet. It does not connect the reviewer wallet.",
@@ -147,6 +155,8 @@ const dictionary: Dictionary = {
   noOnchainPending: { en: "No on-chain applications are waiting for review.", zh: "暂无链上待审核申请。" },
   noLocalPending: { en: "No local website-wallet applications are waiting for review.", zh: "暂无网站钱包本地待审核申请。" },
   approveAndRegister: { en: "Approve & Register On Chain", zh: "批准并写入链上" },
+  rejectApplication: { en: "Reject Application", zh: "拒绝申请" },
+  waitingReviewer: { en: "Waiting reviewer", zh: "等待审核" },
   certificateId: { en: "Certificate ID", zh: "版权编号" },
   transactionHash: { en: "Transaction Hash", zh: "链上交易编号" },
   viewCertificate: { en: "View Certificate", zh: "查看证明" },
@@ -164,8 +174,14 @@ const dictionary: Dictionary = {
   noBlockchainRecord: { en: "No blockchain record exists for this ID.", zh: "该编号不存在链上记录。" },
   myRecords: { en: "My Copyright Records", zh: "我的版权记录" },
   myRecordsSubtitle: {
-    en: "View all copyright registrations created by your wallet.",
-    zh: "查看你的钱包创建的所有版权登记。"
+    en: "View browser submissions and on-chain records for the connected wallet.",
+    zh: "查看本浏览器提交记录，以及当前连接钱包创建的链上记录。"
+  },
+  browserApplications: { en: "This Browser's Applications", zh: "本浏览器提交记录" },
+  onchainWalletRecords: { en: "On-chain Records Created by Connected Wallet", zh: "当前钱包创建的链上记录" },
+  onchainWalletRecordsHint: {
+    en: "If you approve wallet-free submissions with the reviewer wallet, those on-chain records are created by the reviewer wallet and appear here.",
+    zh: "如果你用审核钱包批准无钱包申请，链上创建者就是审核钱包，所以这些记录会显示在这里。"
   },
   noRecords: { en: "No copyright records yet.", zh: "暂无版权记录。" },
   startFirst: { en: "Start your first registration.", zh: "创建你的第一个登记。" },

@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { CONTRACT_ADDRESS, CONTRACT_NAME, EXPLORER_URL, NETWORK_NAME, isContractConfigured } from "../contract/address";
 import { useCopyright } from "../hooks/useCopyright";
 import { useTranslation } from "../i18n";
-import type { CopyrightRecord, RegistrationEvent } from "../types/copyright";
+import type { CopyrightRecord } from "../types/copyright";
 import { formatCertificateId, formatDate } from "../utils/certificate";
 import { formatAddress, formatHash } from "../utils/formatAddress";
 
@@ -16,7 +16,6 @@ export function Explorer() {
   const { t } = useTranslation();
   const copyright = useCopyright();
   const [totalWorks, setTotalWorks] = useState(0);
-  const [events, setEvents] = useState<RegistrationEvent[]>([]);
   const [records, setRecords] = useState<ExplorerRecord[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -30,7 +29,7 @@ export function Explorer() {
         copyright.getRecentRegistrations(8).catch(() => [])
       ]);
 
-      const detailedRecords = await Promise.all(
+      let detailedRecords = await Promise.all(
         recentEvents.map(async (event) => {
           try {
             const record = await copyright.getCopyright(event.id);
@@ -41,9 +40,25 @@ export function Explorer() {
         })
       );
 
+      if (!detailedRecords.some(Boolean) && count > 0) {
+        const ids = Array.from({ length: Math.min(count, 8) }, (_, index) => count - index);
+        detailedRecords = await Promise.all(
+          ids.map(async (id) => {
+            try {
+              const [record, transactionHash] = await Promise.all([
+                copyright.getCopyright(id),
+                copyright.getTransactionHashForId(id)
+              ]);
+              return { ...record, transactionHash };
+            } catch {
+              return null;
+            }
+          })
+        );
+      }
+
       if (active) {
         setTotalWorks(count);
-        setEvents(recentEvents);
         setRecords(detailedRecords.filter((record): record is ExplorerRecord => Boolean(record)));
         setLoading(false);
       }
@@ -56,7 +71,7 @@ export function Explorer() {
     };
   }, []);
 
-  const latestRegistration = events[0] ? formatDate(events[0].timestamp) : "No registrations yet";
+  const latestRegistration = records[0] ? formatDate(records[0].timestamp) : "No registrations yet";
 
   async function copyAddress() {
     if (CONTRACT_ADDRESS) {
@@ -152,7 +167,7 @@ export function Explorer() {
                     </td>
                     <td className="px-5 py-4 text-ink-500">{formatDate(record.timestamp)}</td>
                     <td className="px-5 py-4">
-                      {EXPLORER_URL ? (
+                      {record.transactionHash && EXPLORER_URL ? (
                         <a
                           className="inline-flex items-center gap-1 font-mono font-semibold text-brand-600"
                           href={`${EXPLORER_URL.replace(/\/$/, "")}/tx/${record.transactionHash}`}
@@ -162,10 +177,12 @@ export function Explorer() {
                           {formatHash(record.transactionHash, 8, 6)}
                           <ExternalLink className="h-3.5 w-3.5" />
                         </a>
-                      ) : (
+                      ) : record.transactionHash ? (
                         <Link className="font-mono font-semibold text-brand-600" to={`/transaction/${record.transactionHash}`}>
                           {formatHash(record.transactionHash, 8, 6)}
                         </Link>
+                      ) : (
+                        <span className="text-xs font-semibold text-ink-400">Unavailable</span>
                       )}
                     </td>
                   </tr>

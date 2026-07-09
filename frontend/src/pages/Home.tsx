@@ -6,13 +6,13 @@ import { NetworkBadge } from "../components/NetworkBadge";
 import { NETWORK_NAME, isContractConfigured } from "../contract/address";
 import { useCopyright } from "../hooks/useCopyright";
 import { useTranslation } from "../i18n";
-import type { RegistrationEvent } from "../types/copyright";
+import type { CopyrightRecord } from "../types/copyright";
 
 export function Home() {
   const { t } = useTranslation();
   const copyright = useCopyright();
   const [totalWorks, setTotalWorks] = useState(0);
-  const [events, setEvents] = useState<RegistrationEvent[]>([]);
+  const [records, setRecords] = useState<CopyrightRecord[]>([]);
 
   useEffect(() => {
     let active = true;
@@ -23,9 +23,32 @@ export function Home() {
         copyright.getRecentRegistrations(20).catch(() => [])
       ]);
 
+      let loadedRecords = await Promise.all(
+        recentEvents.map(async (event) => {
+          try {
+            return await copyright.getCopyright(event.id);
+          } catch {
+            return null;
+          }
+        })
+      );
+
+      if (!loadedRecords.some(Boolean) && count > 0) {
+        const ids = Array.from({ length: Math.min(count, 100) }, (_, index) => count - index);
+        loadedRecords = await Promise.all(
+          ids.map(async (id) => {
+            try {
+              return await copyright.getCopyright(id);
+            } catch {
+              return null;
+            }
+          })
+        );
+      }
+
       if (active) {
         setTotalWorks(count);
-        setEvents(recentEvents);
+        setRecords(loadedRecords.filter((record): record is CopyrightRecord => Boolean(record)));
       }
     }
 
@@ -36,7 +59,9 @@ export function Home() {
     };
   }, []);
 
-  const creators = new Set(events.map((event) => event.creator.toLowerCase())).size;
+  const creators = new Set(records.map((record) => record.creator.toLowerCase())).size;
+  const oneWeekAgo = Math.floor(Date.now() / 1000) - 7 * 24 * 60 * 60;
+  const weeklyWorks = records.filter((record) => record.timestamp >= oneWeekAgo).length;
 
   return (
     <div className="page-shell">
@@ -79,8 +104,8 @@ export function Home() {
           {!isContractConfigured ? <span className="text-sm font-medium text-amber-700">{t("notDeployed")}</span> : null}
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <StatCard icon={FileCheck2} label={t("registeredWorks")} value={String(totalWorks)} helper="+0 this week" />
-          <StatCard icon={UsersRound} label={t("creators")} value={String(creators)} helper="Unique wallets" />
+          <StatCard icon={FileCheck2} label={t("registeredWorks")} value={String(totalWorks)} helper={`+${weeklyWorks} ${t("thisWeek")}`} />
+          <StatCard icon={UsersRound} label={t("creators")} value={String(creators)} helper={t("uniqueWallets")} />
           <StatCard icon={Globe2} label={t("network")} value={NETWORK_NAME} helper={isContractConfigured ? t("active") : t("notDeployed")} />
           <StatCard icon={ShieldCheck} label={t("contractStatus")} value={isContractConfigured ? "Operational" : "Setup Needed"} helper={isContractConfigured ? "All systems normal" : "Deploy contract first"} />
         </div>
@@ -148,4 +173,3 @@ function HowStep({
     </div>
   );
 }
-
