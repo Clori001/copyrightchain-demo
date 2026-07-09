@@ -6,27 +6,26 @@ import { CONTRACT_ADDRESS, NETWORK_NAME } from "../contract/address";
 import { useTranslation } from "../i18n";
 import type { CopyrightRecord } from "../types/copyright";
 import { formatCertificateId, formatDate, getCertificateUrl } from "../utils/certificate";
-import { formatAddress, formatHash } from "../utils/formatAddress";
+import { formatAddress } from "../utils/formatAddress";
 import { VerificationBadge } from "./VerificationBadge";
 
 interface CertificateCardProps {
   record: CopyrightRecord;
-  transactionHash?: string;
+  registrationTransactionHash?: string;
+  approvalTransactionHash?: string;
   onCopyLink?: () => void;
   onVerify?: () => void;
 }
 
-export function CertificateCard({ record, transactionHash, onCopyLink, onVerify }: CertificateCardProps) {
+export function CertificateCard({ record, registrationTransactionHash, approvalTransactionHash, onCopyLink, onVerify }: CertificateCardProps) {
   const { t } = useTranslation();
   const certificateId = formatCertificateId(record.id);
   const certificateUrl = getCertificateUrl(certificateId);
 
-  async function copyAddress() {
-    await navigator.clipboard.writeText(record.creator);
-  }
-
-  async function copyHash() {
-    await navigator.clipboard.writeText(record.fileHash);
+  async function copyValue(value?: string) {
+    if (value) {
+      await navigator.clipboard.writeText(value);
+    }
   }
 
   return (
@@ -57,22 +56,35 @@ export function CertificateCard({ record, transactionHash, onCopyLink, onVerify 
             <InfoRow label={t("certificateId")} value={certificateId} />
             <InfoRow label={t("workTitle")} value={record.title} />
             <InfoRow label={t("creator")} value={formatAddress(record.creator)}>
-              <button type="button" className="text-brand-600" onClick={() => void copyAddress()}>
+              <button type="button" className="text-brand-600" onClick={() => void copyValue(record.creator)}>
                 <Copy className="h-4 w-4" aria-label="Copy address" />
               </button>
             </InfoRow>
             <InfoRow label={t("category")} value={record.category} />
             <InfoRow label={t("registeredDate")} value={formatDate(record.timestamp)} />
-            <InfoRow label="Review Status" value={record.approved ? t("approved") : t("pendingReview")} />
-            {record.approvedAt ? <InfoRow label="Approved At" value={formatDate(record.approvedAt)} /> : null}
+            <InfoRow label={t("reviewStatus")} value={record.approved ? t("approved") : t("pendingReview")} />
+            {record.approvedAt ? <InfoRow label={t("approvedAt")} value={formatDate(record.approvedAt)} /> : null}
           </InfoSection>
 
           <InfoSection title={t("blockchainProof")}>
             <InfoRow label={t("network")} value={NETWORK_NAME} />
             <InfoRow label={t("smartContract")} value={CONTRACT_ADDRESS ? formatAddress(CONTRACT_ADDRESS) : "Not deployed"} />
-            <InfoRow label={t("transactionHash")} value={transactionHash ? formatHash(transactionHash) : "Pending explorer lookup"} />
-            <InfoRow label={t("fileHash")} value={formatHash(record.fileHash)}>
-              <button type="button" className="text-brand-600" onClick={() => void copyHash()}>
+            <InfoRow label={t("registrationTransactionHash")} value={registrationTransactionHash || t("transactionHashUnavailable")}>
+              {registrationTransactionHash ? (
+                <button type="button" className="text-brand-600" onClick={() => void copyValue(registrationTransactionHash)}>
+                  <Copy className="h-4 w-4" aria-label="Copy registration transaction hash" />
+                </button>
+              ) : null}
+            </InfoRow>
+            <InfoRow label={t("approvalTransactionHash")} value={approvalTransactionHash || t("transactionHashUnavailable")}>
+              {approvalTransactionHash ? (
+                <button type="button" className="text-brand-600" onClick={() => void copyValue(approvalTransactionHash)}>
+                  <Copy className="h-4 w-4" aria-label="Copy approval transaction hash" />
+                </button>
+              ) : null}
+            </InfoRow>
+            <InfoRow label={t("fileSha256Hash")} value={record.fileHash}>
+              <button type="button" className="text-brand-600" onClick={() => void copyValue(record.fileHash)}>
                 <Copy className="h-4 w-4" aria-label="Copy file hash" />
               </button>
             </InfoRow>

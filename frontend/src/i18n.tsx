@@ -184,8 +184,15 @@ const dictionary: Dictionary = {
   approveAndRegister: { en: "Approve & Register On Chain", zh: "批准并写入链上" },
   rejectApplication: { en: "Reject Application", zh: "拒绝申请" },
   waitingReviewer: { en: "Waiting reviewer", zh: "等待审核" },
+  applicationId: { en: "Application ID", zh: "申请编号" },
   certificateId: { en: "Certificate ID", zh: "版权编号" },
   transactionHash: { en: "Transaction Hash", zh: "链上交易编号" },
+  registrationTransactionHash: { en: "Registration Tx Hash", zh: "登记交易 Hash" },
+  approvalTransactionHash: { en: "Approval Tx Hash", zh: "审核交易 Hash" },
+  transactionHashUnavailable: { en: "Not found from RPC", zh: "暂未从 RPC 读取到" },
+  fileSha256Hash: { en: "File SHA-256 Hash", zh: "文件 SHA-256 Hash" },
+  reviewStatus: { en: "Review Status", zh: "审核状态" },
+  approvedAt: { en: "Approved At", zh: "审核通过时间" },
   viewCertificate: { en: "View Certificate", zh: "查看证明" },
   digitalCertificate: { en: "Digital Copyright Certificate", zh: "数字版权登记证明" },
   verifiedOnChain: { en: "VERIFIED ON CHAIN", zh: "链上验证通过" },
@@ -199,6 +206,12 @@ const dictionary: Dictionary = {
   scanToVerify: { en: "Scan to verify this certificate", zh: "扫描验证该证明" },
   certificateNotFound: { en: "Certificate Not Found", zh: "未找到版权证明" },
   noBlockchainRecord: { en: "No blockchain record exists for this ID.", zh: "该编号不存在链上记录。" },
+  certificatePendingTitle: { en: "Certificate Not Issued Yet", zh: "证书尚未签发" },
+  certificatePendingBody: {
+    en: "This on-chain record exists, but it is still waiting for reviewer approval. A public certificate is only available after approval.",
+    zh: "这条链上记录已经存在，但仍在等待审核。只有审核通过后才会生成公开证书。"
+  },
+  noCertificateUntilApproved: { en: "No certificate yet", zh: "未通过暂无证书" },
   myRecords: { en: "My Copyright Records", zh: "我的版权记录" },
   myRecordsSubtitle: {
     en: "View browser submissions and on-chain records for the connected wallet.",

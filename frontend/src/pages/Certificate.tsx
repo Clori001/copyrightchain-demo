@@ -13,7 +13,8 @@ export function Certificate() {
   const { t } = useTranslation();
   const copyright = useCopyright();
   const [record, setRecord] = useState<CopyrightRecord | null>(null);
-  const [transactionHash, setTransactionHash] = useState("");
+  const [registrationTransactionHash, setRegistrationTransactionHash] = useState("");
+  const [approvalTransactionHash, setApprovalTransactionHash] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
@@ -31,12 +32,14 @@ export function Certificate() {
     setError("");
 
     try {
-      const [copyrightRecord, hash] = await Promise.all([
+      const [copyrightRecord, registrationHash, approvalHash] = await Promise.all([
         copyright.getCopyright(numericId),
-        copyright.getTransactionHashForId(numericId)
+        copyright.getTransactionHashForId(numericId),
+        copyright.getApprovalTransactionHashForId(numericId)
       ]);
       setRecord(copyrightRecord);
-      setTransactionHash(hash);
+      setRegistrationTransactionHash(registrationHash);
+      setApprovalTransactionHash(approvalHash);
     } catch (certificateError) {
       setError(certificateError instanceof Error ? certificateError.message : t("noBlockchainRecord"));
     } finally {
@@ -88,6 +91,35 @@ export function Certificate() {
     );
   }
 
+  if (!record.approved) {
+    return (
+      <div className="page-shell">
+        <Link className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-brand-600" to="/my-works">
+          <ArrowLeft className="h-4 w-4" />
+          Back to My Works
+        </Link>
+        <div className="panel mx-auto max-w-2xl p-8 text-center">
+          <CircleAlert className="mx-auto h-14 w-14 text-amber-500" />
+          <h1 className="mt-4 text-2xl font-bold text-ink-900">{t("certificatePendingTitle")}</h1>
+          <p className="mt-2 text-sm leading-6 text-ink-500">{t("certificatePendingBody")}</p>
+          <dl className="mt-6 grid gap-3 rounded-lg border border-amber-100 bg-amber-50 p-4 text-left text-sm">
+            <div className="grid grid-cols-[140px_1fr] gap-3">
+              <dt className="text-ink-500">{t("applicationId")}</dt>
+              <dd className="font-semibold text-ink-900">{formatCertificateId(record.id)}</dd>
+            </div>
+            <div className="grid grid-cols-[140px_1fr] gap-3">
+              <dt className="text-ink-500">{t("registrationTransactionHash")}</dt>
+              <dd className="break-all font-mono font-semibold text-ink-900">{registrationTransactionHash || t("transactionHashUnavailable")}</dd>
+            </div>
+          </dl>
+          <button type="button" className="mt-6 btn-primary" onClick={() => navigate("/verify")}>
+            {t("verify")}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="page-shell">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
@@ -99,11 +131,11 @@ export function Certificate() {
       </div>
       <CertificateCard
         record={record}
-        transactionHash={transactionHash}
+        registrationTransactionHash={registrationTransactionHash}
+        approvalTransactionHash={approvalTransactionHash}
         onCopyLink={() => void copyLink()}
         onVerify={() => void loadCertificate()}
       />
     </div>
   );
 }
-

@@ -10,6 +10,7 @@ export interface StoredPreview {
 
 const previewKey = (id: number) => `copyrightchain:preview:${id}`;
 const txKey = (id: number) => `copyrightchain:tx:${id}`;
+const approvalTxKey = (id: number) => `copyrightchain:approval-tx:${id}`;
 const recordKey = (id: number) => `copyrightchain:record:${id}`;
 const websiteApplicationsKey = "copyrightchain:website-applications";
 
@@ -37,6 +38,14 @@ export function saveTransactionHash(id: number, hash: string) {
 
 export function getSavedTransactionHash(id: number) {
   return localStorage.getItem(txKey(id)) || "";
+}
+
+export function saveApprovalTransactionHash(id: number, hash: string) {
+  localStorage.setItem(approvalTxKey(id), hash);
+}
+
+export function getSavedApprovalTransactionHash(id: number) {
+  return localStorage.getItem(approvalTxKey(id)) || "";
 }
 
 export function saveLocalRecord(record: CopyrightRecord) {

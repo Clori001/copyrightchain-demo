@@ -190,7 +190,7 @@ export function MyWorks() {
                 <p className="mt-1 text-sm text-ink-500">{record.category}</p>
                 <dl className="mt-3 grid gap-1 text-xs text-ink-500">
                   <div className="flex justify-between gap-3">
-                    <dt>{t("certificateId")}</dt>
+                    <dt>{record.approved ? t("certificateId") : t("applicationId")}</dt>
                     <dd className="font-semibold text-ink-900">{formatCertificateId(record.id)}</dd>
                   </div>
                   <div className="flex justify-between gap-3">
@@ -200,9 +200,13 @@ export function MyWorks() {
                 </dl>
                 <div className="mt-4 flex items-center justify-between gap-3">
                   <ChainStatusBadge approved={record.approved} />
-                  <Link className="btn-secondary px-3 py-1.5 text-xs" to={`/certificate/${formatCertificateId(record.id)}`}>
-                    {t("viewCertificate")}
-                  </Link>
+                  {record.approved ? (
+                    <Link className="btn-secondary px-3 py-1.5 text-xs" to={`/certificate/${formatCertificateId(record.id)}`}>
+                      {t("viewCertificate")}
+                    </Link>
+                  ) : (
+                    <span className="text-xs font-semibold text-ink-500">{t("noCertificateUntilApproved")}</span>
+                  )}
                 </div>
               </div>
             </article>
@@ -245,7 +249,7 @@ function WebsiteApplicationCard({ application }: { application: WebsiteApplicati
         <p className="mt-2 text-xs text-ink-500">Local ID: {application.localId.slice(0, 8)}</p>
         <div className="mt-4 flex items-center justify-between gap-3">
           <ApplicationStatusBadge status={application.status} />
-          {application.certificateId ? (
+          {application.status === "approved" && application.certificateId ? (
             <Link className="btn-secondary px-3 py-1.5 text-xs" to={`/certificate/${formatCertificateId(application.certificateId)}`}>
               {t("viewCertificate")}
             </Link>

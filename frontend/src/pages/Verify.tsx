@@ -104,8 +104,8 @@ export function Verify() {
               <VerifyRow label="Creator Wallet" value={formatAddress(record.creator)} />
               <VerifyRow label={t("timestamp")} value={formatDate(record.timestamp)} />
               <VerifyRow label="Review Status" value={record.approved ? t("approved") : t("pendingReview")} />
-              <VerifyRow label={t("fileHash")} value={formatHash(record.fileHash)} />
-              <VerifyRow label={t("transactionHash")} value={transactionHash ? formatHash(transactionHash) : "Pending explorer lookup"} />
+              <VerifyRow label={t("fileSha256Hash")} value={formatHash(record.fileHash)} />
+              <VerifyRow label={t("registrationTransactionHash")} value={transactionHash ? formatHash(transactionHash) : t("transactionHashUnavailable")} />
             </dl>
             <div className="mt-6 rounded-lg border border-brand-100 bg-brand-50 p-4 text-sm text-ink-500">
               You can view this record on the blockchain explorer.

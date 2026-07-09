@@ -13,6 +13,7 @@ import {
   getPreview,
   getWebsiteApplications,
   saveLocalRecord,
+  saveApprovalTransactionHash,
   savePreview,
   saveTransactionHash,
   updateWebsiteApplication
@@ -80,9 +81,9 @@ export function Review() {
 
     try {
       const hash = await copyright.approveCopyright(record.id, (nextStage) => setStage(nextStage));
-      saveTransactionHash(record.id, hash);
+      saveApprovalTransactionHash(record.id, hash);
       const updatedRecord = await copyright.getCopyright(record.id);
-      saveLocalRecord({ ...updatedRecord, transactionHash: hash });
+      saveLocalRecord(updatedRecord);
       await loadReviewQueue();
     } catch (approveError) {
       setError(approveError instanceof Error ? approveError.message : "Approval failed.");
@@ -108,9 +109,10 @@ export function Review() {
         (nextStage) => setStage(nextStage)
       );
 
-      await copyright.approveCopyright(result.certificateId, (nextStage) => setStage(nextStage));
+      const approvalHash = await copyright.approveCopyright(result.certificateId, (nextStage) => setStage(nextStage));
 
       saveTransactionHash(result.certificateId, result.transactionHash);
+      saveApprovalTransactionHash(result.certificateId, approvalHash);
       savePreview({
         id: result.certificateId,
         fileName: application.fileName,

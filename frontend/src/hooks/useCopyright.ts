@@ -10,7 +10,7 @@ import type {
   RegistrationResult,
   TransactionStage
 } from "../types/copyright";
-import { getSavedTransactionHash } from "../utils/localPreview";
+import { getSavedApprovalTransactionHash, getSavedTransactionHash } from "../utils/localPreview";
 
 type ProgressCallback = (stage: TransactionStage, transactionHash?: string) => void;
 
@@ -190,14 +190,8 @@ export function useCopyright() {
   }
 
   async function getTransactionHashForId(id: number) {
-    const savedHash = getSavedTransactionHash(id);
-
-    if (savedHash) {
-      return savedHash;
-    }
-
     if (!isContractConfigured) {
-      return "";
+      return getSavedTransactionHash(id);
     }
 
     try {
@@ -206,9 +200,26 @@ export function useCopyright() {
       const events = await contract.queryFilter(filter, 0, "latest");
       const event = events[0];
 
-      return event?.transactionHash || "";
+      return event?.transactionHash || getSavedTransactionHash(id);
     } catch {
-      return "";
+      return getSavedTransactionHash(id);
+    }
+  }
+
+  async function getApprovalTransactionHashForId(id: number) {
+    if (!isContractConfigured) {
+      return getSavedApprovalTransactionHash(id);
+    }
+
+    try {
+      const contract = getReadContract();
+      const filter = contract.filters.CopyrightApproved(BigInt(id));
+      const events = await contract.queryFilter(filter, 0, "latest");
+      const event = events[0];
+
+      return event?.transactionHash || getSavedApprovalTransactionHash(id);
+    } catch {
+      return getSavedApprovalTransactionHash(id);
     }
   }
 
@@ -251,6 +262,7 @@ export function useCopyright() {
     approveCopyright,
     getPendingCopyrights,
     getTransactionHashForId,
+    getApprovalTransactionHashForId,
     getRecentRegistrations
   };
 }
