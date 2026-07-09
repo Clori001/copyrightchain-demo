@@ -8,6 +8,8 @@ import type { CopyrightRecord } from "../types/copyright";
 import { formatCertificateId, formatDate } from "../utils/certificate";
 import { formatAddress, formatHash } from "../utils/formatAddress";
 
+const PUBLIC_CERTIFICATE_LIMIT = 50;
+
 interface ExplorerRecord extends CopyrightRecord {
   transactionHash: string;
 }
@@ -24,42 +26,28 @@ export function Explorer() {
 
     async function loadExplorer() {
       setLoading(true);
-      const [count, recentEvents] = await Promise.all([
-        copyright.getTotalWorks().catch(() => 0),
-        copyright.getRecentRegistrations(8).catch(() => [])
-      ]);
-
-      let detailedRecords = await Promise.all(
-        recentEvents.map(async (event) => {
+      const count = await copyright.getTotalWorks().catch(() => 0);
+      const ids = Array.from({ length: Math.min(count, PUBLIC_CERTIFICATE_LIMIT) }, (_, index) => count - index);
+      const detailedRecords = await Promise.all(
+        ids.map(async (id) => {
           try {
-            const record = await copyright.getCopyright(event.id);
-            return { ...record, transactionHash: event.transactionHash };
+            const record = await copyright.getCopyright(id);
+
+            if (!record.approved) {
+              return null;
+            }
+
+            const transactionHash = await copyright.getTransactionHashForId(id).catch(() => "");
+            return { ...record, transactionHash };
           } catch {
             return null;
           }
         })
       );
 
-      if (!detailedRecords.some(Boolean) && count > 0) {
-        const ids = Array.from({ length: Math.min(count, 8) }, (_, index) => count - index);
-        detailedRecords = await Promise.all(
-          ids.map(async (id) => {
-            try {
-              const [record, transactionHash] = await Promise.all([
-                copyright.getCopyright(id),
-                copyright.getTransactionHashForId(id)
-              ]);
-              return { ...record, transactionHash };
-            } catch {
-              return null;
-            }
-          })
-        );
-      }
-
       if (active) {
         setTotalWorks(count);
-        setRecords(detailedRecords.filter((record): record is ExplorerRecord => Boolean(record)));
+        setRecords(detailedRecords.filter((record): record is ExplorerRecord => Boolean(record)).sort((a, b) => b.id - a.id));
         setLoading(false);
       }
     }
@@ -71,7 +59,7 @@ export function Explorer() {
     };
   }, []);
 
-  const latestRegistration = records[0] ? formatDate(records[0].timestamp) : "No registrations yet";
+  const latestRegistration = records[0] ? formatDate(records[0].timestamp) : t("noPublicCertificatesYet");
 
   async function copyAddress() {
     if (CONTRACT_ADDRESS) {
@@ -82,7 +70,7 @@ export function Explorer() {
   return (
     <div className="page-shell">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-ink-900">Blockchain Explorer</h1>
+        <h1 className="text-3xl font-bold text-ink-900">{t("discoverTitle")}</h1>
         <p className="mt-2 text-sm text-ink-500">{t("explorerDescription")}</p>
       </div>
 
@@ -121,7 +109,7 @@ export function Explorer() {
 
       <section className="panel mt-5 overflow-hidden">
         <div className="flex items-center justify-between gap-4 border-b border-slate-200 p-5">
-          <h2 className="text-lg font-bold text-ink-900">{t("latestRegistrations")}</h2>
+          <h2 className="text-lg font-bold text-ink-900">{t("publicCertificates")}</h2>
           {loading ? (
             <span className="flex items-center gap-2 text-sm font-semibold text-brand-700">
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -136,7 +124,34 @@ export function Explorer() {
             Contract address is not configured. Deploy the contract first to load on-chain records.
           </div>
         ) : records.length ? (
-          <div className="overflow-x-auto">
+          <>
+          <div className="divide-y divide-slate-100 md:hidden">
+            {records.map((record) => (
+              <article key={record.id} className="p-5">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <Link className="font-mono text-sm font-bold text-brand-600" to={`/certificate/${formatCertificateId(record.id)}`}>
+                      {formatCertificateId(record.id)}
+                    </Link>
+                    <h3 className="mt-2 truncate text-lg font-bold text-ink-900">{record.title}</h3>
+                    <p className="mt-1 text-sm text-ink-500">{record.category}</p>
+                  </div>
+                  <span className="shrink-0 rounded-md bg-emerald-50 px-2 py-1 text-xs font-bold text-emerald-700">
+                    {t("approved")}
+                  </span>
+                </div>
+                <dl className="mt-4 grid gap-2 text-sm">
+                  <InfoLine label={t("creator")} value={formatAddress(record.creator)} />
+                  <InfoLine label={t("registeredDate")} value={formatDate(record.timestamp)} />
+                  <InfoLine label={t("transaction")} value={record.transactionHash ? formatHash(record.transactionHash, 8, 6) : "Unavailable"} />
+                </dl>
+                <Link className="mt-4 inline-flex btn-secondary px-3 py-1.5 text-xs" to={`/certificate/${formatCertificateId(record.id)}`}>
+                  {t("viewCertificate")}
+                </Link>
+              </article>
+            ))}
+          </div>
+          <div className="hidden overflow-x-auto md:block">
             <table className="min-w-full divide-y divide-slate-200 text-left text-sm">
               <thead className="bg-slate-50 text-xs font-bold uppercase text-ink-500">
                 <tr>
@@ -147,12 +162,17 @@ export function Explorer() {
                   <th className="px-5 py-3">Status</th>
                   <th className="px-5 py-3">{t("timestamp")}</th>
                   <th className="px-5 py-3">{t("transaction")}</th>
+                  <th className="px-5 py-3">{t("certificate")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 bg-white">
                 {records.map((record) => (
                   <tr key={record.id}>
-                    <td className="px-5 py-4 font-semibold text-ink-900">{formatCertificateId(record.id)}</td>
+                    <td className="px-5 py-4">
+                      <Link className="font-mono font-semibold text-brand-600" to={`/certificate/${formatCertificateId(record.id)}`}>
+                        {formatCertificateId(record.id)}
+                      </Link>
+                    </td>
                     <td className="px-5 py-4 text-ink-900">{record.title}</td>
                     <td className="px-5 py-4 text-ink-500">{record.category}</td>
                     <td className="px-5 py-4 font-mono text-ink-500">{formatAddress(record.creator)}</td>
@@ -185,13 +205,19 @@ export function Explorer() {
                         <span className="text-xs font-semibold text-ink-400">Unavailable</span>
                       )}
                     </td>
+                    <td className="px-5 py-4">
+                      <Link className="btn-secondary px-3 py-1.5 text-xs" to={`/certificate/${formatCertificateId(record.id)}`}>
+                        {t("viewCertificate")}
+                      </Link>
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+          </>
         ) : (
-          <div className="p-8 text-center text-sm text-ink-500">No registrations found yet.</div>
+          <div className="p-8 text-center text-sm text-ink-500">{t("noPublicCertificatesYet")}</div>
         )}
       </section>
     </div>

@@ -239,15 +239,19 @@ const dictionary: Dictionary = {
   noRecordFound: { en: "No Record Found", zh: "未找到记录" },
   noRecordFoundBody: { en: "This certificate ID does not exist.", zh: "该版权编号不存在。" },
   viewExplorer: { en: "View on Explorer", zh: "在浏览器查看" },
+  discoverTitle: { en: "Discover Certificates", zh: "发现证书" },
   explorerDescription: {
-    en: "Explore copyright registration records on the blockchain.",
-    zh: "浏览区块链上的版权登记记录。"
+    en: "Explore public approved copyright certificates from the blockchain.",
+    zh: "浏览区块链上已审核通过的公开版权证书。"
   },
   contractInformation: { en: "Contract Information", zh: "合约信息" },
   contractName: { en: "Contract Name", zh: "合约名称" },
   contractAddress: { en: "Contract Address", zh: "合约地址" },
+  publicCertificates: { en: "Public Certificates", zh: "公开证书" },
+  noPublicCertificatesYet: { en: "No public approved certificates yet.", zh: "暂无已审核通过的公开证书。" },
   latestRegistrations: { en: "Latest Registrations", zh: "最新登记记录" },
   timestamp: { en: "Timestamp", zh: "时间戳" },
+  certificate: { en: "Certificate", zh: "证书" },
   transaction: { en: "Transaction", zh: "交易" }
 };
 

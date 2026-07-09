@@ -16,6 +16,8 @@ export interface LocalDeploymentInfo {
   reviewerAddress: string;
   deployerAddress: string;
   deployedAt: string;
+  rpcUrl?: string;
+  explorerUrl?: string;
 }
 
 export const LOCAL_DEPLOYMENT_KEY = "copyrightchain:deployment";
@@ -71,8 +73,8 @@ export const CONTRACT_ADDRESS = envAddress || localDeployment?.contractAddress |
 export const CONTRACT_NAME = deploymentInfo.contractName || "CopyrightRegistry";
 export const NETWORK_NAME = envNetwork || localDeployment?.network || deploymentInfo.network || "Monad Testnet";
 export const CHAIN_ID = Number(envChainId || localDeployment?.chainId || deploymentInfo.chainId || 10143);
-export const RPC_URL = envRpcUrl || "";
-export const EXPLORER_URL = envExplorerUrl || "";
+export const RPC_URL = envRpcUrl || localDeployment?.rpcUrl || deploymentInfo.rpcUrl || "https://testnet-rpc.monad.xyz";
+export const EXPLORER_URL = envExplorerUrl || localDeployment?.explorerUrl || deploymentInfo.explorerUrl || "";
 
 export const isContractConfigured = Boolean(CONTRACT_ADDRESS);
 

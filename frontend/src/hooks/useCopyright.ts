@@ -1,7 +1,7 @@
 import { Interface } from "ethers";
 import abi from "../contract/abi.json";
 import { isContractConfigured } from "../contract/address";
-import { getReadContract, getWriteContract } from "./useContract";
+import { getReadContract, getReadProvider, getWriteContract } from "./useContract";
 import { useWallet } from "./useWallet";
 import type {
   CopyrightRecord,
@@ -13,6 +13,8 @@ import type {
 import { getSavedApprovalTransactionHash, getSavedTransactionHash } from "../utils/localPreview";
 
 type ProgressCallback = (stage: TransactionStage, transactionHash?: string) => void;
+const LOG_QUERY_BLOCK_RANGE = 100;
+const EVENT_BLOCK_PADDING = 1200;
 
 interface RawCopyrightRecord {
   id: bigint;
@@ -66,6 +68,59 @@ function getUserFriendlyError(error: unknown) {
   }
 
   return message || "Blockchain request failed.";
+}
+
+async function findFirstBlockAtOrAfterTimestamp(timestamp: number) {
+  const provider = getReadProvider();
+  const latestBlockNumber = await provider.getBlockNumber();
+  let low = 0;
+  let high = latestBlockNumber;
+  let best = latestBlockNumber;
+
+  while (low <= high) {
+    const middle = Math.floor((low + high) / 2);
+    const block = await provider.getBlock(middle);
+
+    if (!block) {
+      break;
+    }
+
+    if (block.timestamp >= timestamp) {
+      best = middle;
+      high = middle - 1;
+    } else {
+      low = middle + 1;
+    }
+  }
+
+  return best;
+}
+
+async function queryFirstEventHashNearTimestamp(
+  filter: ReturnType<ReturnType<typeof getReadContract>["filters"]["CopyrightSubmitted"]>,
+  timestamp: number
+) {
+  if (!timestamp) {
+    return "";
+  }
+
+  const provider = getReadProvider();
+  const contract = getReadContract();
+  const latestBlockNumber = await provider.getBlockNumber();
+  const centerBlock = await findFirstBlockAtOrAfterTimestamp(timestamp);
+  const fromBlock = Math.max(0, centerBlock - EVENT_BLOCK_PADDING);
+  const toBlock = Math.min(latestBlockNumber, centerBlock + EVENT_BLOCK_PADDING);
+
+  for (let startBlock = fromBlock; startBlock <= toBlock; startBlock += LOG_QUERY_BLOCK_RANGE) {
+    const endBlock = Math.min(toBlock, startBlock + LOG_QUERY_BLOCK_RANGE - 1);
+    const events = await contract.queryFilter(filter, startBlock, endBlock);
+
+    if (events[0]) {
+      return events[0].transactionHash;
+    }
+  }
+
+  return "";
 }
 
 export function useCopyright() {
@@ -196,11 +251,9 @@ export function useCopyright() {
 
     try {
       const contract = getReadContract();
+      const record = await getCopyright(id);
       const filter = contract.filters.CopyrightSubmitted(BigInt(id));
-      const events = await contract.queryFilter(filter, 0, "latest");
-      const event = events[0];
-
-      return event?.transactionHash || getSavedTransactionHash(id);
+      return (await queryFirstEventHashNearTimestamp(filter, record.timestamp)) || getSavedTransactionHash(id);
     } catch {
       return getSavedTransactionHash(id);
     }
@@ -213,11 +266,14 @@ export function useCopyright() {
 
     try {
       const contract = getReadContract();
-      const filter = contract.filters.CopyrightApproved(BigInt(id));
-      const events = await contract.queryFilter(filter, 0, "latest");
-      const event = events[0];
+      const record = await getCopyright(id);
 
-      return event?.transactionHash || getSavedApprovalTransactionHash(id);
+      if (!record.approvedAt) {
+        return getSavedApprovalTransactionHash(id);
+      }
+
+      const filter = contract.filters.CopyrightApproved(BigInt(id));
+      return (await queryFirstEventHashNearTimestamp(filter, record.approvedAt)) || getSavedApprovalTransactionHash(id);
     } catch {
       return getSavedApprovalTransactionHash(id);
     }

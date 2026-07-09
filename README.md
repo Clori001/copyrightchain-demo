@@ -55,7 +55,7 @@ For testnet deployment, create `contract/.env`:
 
 ```bash
 PRIVATE_KEY=your_wallet_private_key
-RPC_URL=your_testnet_rpc
+RPC_URL=https://testnet-rpc.monad.xyz
 CHAIN_ID=10143
 NETWORK_NAME=Monad Testnet
 ```
@@ -84,7 +84,7 @@ Optional `frontend/.env`:
 VITE_CONTRACT_ADDRESS=
 VITE_CHAIN_ID=10143
 VITE_NETWORK=Monad Testnet
-VITE_RPC_URL=
+VITE_RPC_URL=https://testnet-rpc.monad.xyz
 VITE_EXPLORER_URL=
 VITE_REVIEWER_ADDRESS=0x0Ec53965623c01C8C5a3af8F0d42Bb84cf7b837d
 VITE_SUPABASE_URL=
@@ -130,7 +130,7 @@ Environment variables:
 VITE_CONTRACT_ADDRESS=
 VITE_CHAIN_ID=10143
 VITE_NETWORK=Monad Testnet
-VITE_RPC_URL=
+VITE_RPC_URL=https://testnet-rpc.monad.xyz
 VITE_EXPLORER_URL=
 VITE_REVIEWER_ADDRESS=0x0Ec53965623c01C8C5a3af8F0d42Bb84cf7b837d
 VITE_SUPABASE_URL=https://eqbdsxhwxbbhgvprmxyi.supabase.co
