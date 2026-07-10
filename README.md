@@ -147,7 +147,7 @@ Public pages:
 /explorer
 ```
 
-公开页面包括登记、验证、我的作品和发现页。
+公开页面包括登记、验证、我的作品和所有作品页。
 
 Password-gated Review Center pages on the same site:
 

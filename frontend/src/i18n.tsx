@@ -10,7 +10,7 @@ const dictionary: Dictionary = {
   register: { en: "Register Copyright", zh: "登记版权" },
   myWorks: { en: "My Works", zh: "我的作品" },
   verify: { en: "Verify Copyright", zh: "验证版权" },
-  explorer: { en: "Discover", zh: "发现" },
+  explorer: { en: "All Works", zh: "所有作品" },
   admin: { en: "Review Center", zh: "审核中心" },
   review: { en: "Review", zh: "审核" },
   deploy: { en: "Deploy", zh: "部署" },
@@ -103,8 +103,8 @@ const dictionary: Dictionary = {
   },
   publicRegistrationNoticeTitle: { en: "What will be public?", zh: "哪些内容会公开？" },
   publicRegistrationNoticeBody: {
-    en: "The work title, metadata, file SHA-256 hash, and approved digital certificate can be public and visible in Discover after review. The work file itself is not uploaded or published by this site.",
-    zh: "作品名称、作品信息、文件 SHA-256 Hash 和审核通过后的数字证明会公开，并可在“发现”中查看。作品文件本身不会被本网站上传或公开。"
+    en: "The work title, metadata, file SHA-256 hash, and approved digital certificate can be public and visible in All Works after review. The work file itself is not uploaded or published by this site.",
+    zh: "作品名称、作品信息、文件 SHA-256 Hash 和审核通过后的数字证明会公开，并可在“所有作品”中查看。作品文件本身不会被本网站上传或公开。"
   },
   connectWalletToRegister: { en: "Connect your wallet to continue", zh: "请先连接钱包再继续" },
   visitorWalletConnectHint: {
@@ -270,8 +270,8 @@ const dictionary: Dictionary = {
   verified: { en: "Verified", zh: "验证成功" },
   noRecordFound: { en: "No Record Found", zh: "未找到记录" },
   noRecordFoundBody: { en: "This certificate ID does not exist.", zh: "该版权编号不存在。" },
-  viewExplorer: { en: "View in Discover", zh: "在发现查看" },
-  discoverTitle: { en: "Discover Certificates", zh: "发现证书" },
+  viewExplorer: { en: "View in All Works", zh: "在所有作品中查看" },
+  discoverTitle: { en: "All Public Works", zh: "所有作品" },
   explorerDescription: {
     en: "Explore public approved copyright certificates from the blockchain.",
     zh: "浏览区块链上已审核通过的公开版权证书。"

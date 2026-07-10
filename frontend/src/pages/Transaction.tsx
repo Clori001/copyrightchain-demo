@@ -56,7 +56,7 @@ export function Transaction() {
   return (
     <div className="page-shell">
       <Link className="mb-5 inline-block text-sm font-semibold text-brand-600" to="/explorer">
-        Back to Explorer
+        Back to All Works
       </Link>
       <section className="panel mx-auto max-w-3xl p-6">
         <div className="mb-6 flex items-center gap-4">
@@ -101,4 +101,3 @@ function Detail({ label, value, mono = false }: { label: string; value: string; 
     </div>
   );
 }
-
