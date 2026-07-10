@@ -9,6 +9,7 @@ import { useCopyright } from "../hooks/useCopyright";
 import { useTranslation } from "../i18n";
 import type { CopyrightRecord } from "../types/copyright";
 import { formatAddress } from "../utils/formatAddress";
+import { listHiddenCertificateIds } from "../utils/hiddenCertificates";
 import { isSupabaseConfigured } from "../utils/supabaseApplications";
 
 export function Home() {
@@ -21,10 +22,12 @@ export function Home() {
     let active = true;
 
     async function loadStats() {
-      const [count, recentEvents] = await Promise.all([
+      const [count, recentEvents, hiddenIds] = await Promise.all([
         copyright.getTotalWorks().catch(() => 0),
-        copyright.getRecentRegistrations(20).catch(() => [])
+        copyright.getRecentRegistrations(20).catch(() => []),
+        listHiddenCertificateIds().catch(() => [])
       ]);
+      const hiddenIdSet = new Set(hiddenIds);
 
       let loadedRecords = await Promise.all(
         recentEvents.map(async (event) => {
@@ -50,8 +53,12 @@ export function Home() {
       }
 
       if (active) {
-        setTotalWorks(count);
-        setRecords(loadedRecords.filter((record): record is CopyrightRecord => Boolean(record)));
+        const visibleRecords = loadedRecords
+          .filter((record): record is CopyrightRecord => Boolean(record))
+          .filter((record) => !hiddenIdSet.has(record.id));
+
+        setTotalWorks(Math.max(0, count - hiddenIdSet.size));
+        setRecords(visibleRecords);
       }
     }
 

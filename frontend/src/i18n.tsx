@@ -11,7 +11,7 @@ const dictionary: Dictionary = {
   myWorks: { en: "My Works", zh: "我的作品" },
   verify: { en: "Verify Copyright", zh: "验证版权" },
   explorer: { en: "Discover", zh: "发现" },
-  admin: { en: "Admin", zh: "后台" },
+  admin: { en: "Review Center", zh: "审核中心" },
   review: { en: "Review", zh: "审核" },
   deploy: { en: "Deploy", zh: "部署" },
   connectWallet: { en: "Connect Wallet", zh: "连接钱包" },
@@ -101,14 +101,19 @@ const dictionary: Dictionary = {
     en: "A hash is a unique digital fingerprint generated from your file. Any modification creates a different hash.",
     zh: "Hash 是文件唯一数字指纹。文件内容改变后，Hash 也会改变。"
   },
+  publicRegistrationNoticeTitle: { en: "What will be public?", zh: "哪些内容会公开？" },
+  publicRegistrationNoticeBody: {
+    en: "The work title, metadata, file SHA-256 hash, and approved digital certificate can be public and visible in Discover after review. The work file itself is not uploaded or published by this site.",
+    zh: "作品名称、作品信息、文件 SHA-256 Hash 和审核通过后的数字证明会公开，并可在“发现”中查看。作品文件本身不会被本网站上传或公开。"
+  },
   connectWalletToRegister: { en: "Connect your wallet to continue", zh: "请先连接钱包再继续" },
   visitorWalletConnectHint: {
-    en: "This connects the visitor's own MetaMask. After connecting, the registration transaction will be confirmed in that wallet.",
-    zh: "这里连接的是访客自己的 MetaMask。连接后，链上登记交易会在这个钱包里确认。"
+    en: "This connects the visitor's own injected EVM wallet, such as MetaMask or Rabby. After connecting, the transaction is confirmed in that wallet.",
+    zh: "这里连接的是访客自己的 EVM 钱包，例如 MetaMask 或 Rabby。连接后，链上交易会在这个钱包里确认。"
   },
   contractNotConfiguredRegister: {
-    en: "Your wallet and network may be correct, but this site has no deployed contract address yet. Open Admin > Deploy, deploy the contract on Monad Testnet, then add the address to Vercel as VITE_CONTRACT_ADDRESS and redeploy.",
-    zh: "你的钱包和网络可以是正确的，但这个网站还没有配置已部署的合约地址。请打开后台 > 部署，在 Monad Testnet 部署合约，然后把合约地址填到 Vercel 的 VITE_CONTRACT_ADDRESS 并重新部署。"
+    en: "Your wallet and network may be correct, but this site has no deployed contract address yet. Open Review Center > Deploy, deploy the contract on Monad Testnet, then add the address to Vercel as VITE_CONTRACT_ADDRESS and redeploy.",
+    zh: "你的钱包和网络可以是正确的，但这个网站还没有配置已部署的合约地址。请打开审核中心 > 部署，在 Monad Testnet 部署合约，然后把合约地址填到 Vercel 的 VITE_CONTRACT_ADDRESS 并重新部署。"
   },
   workTitle: { en: "Work Title", zh: "作品名称" },
   category: { en: "Category", zh: "分类" },
@@ -137,21 +142,25 @@ const dictionary: Dictionary = {
     en: "Reject this application? It will be removed from the pending review list.",
     zh: "确定拒绝这个申请吗？它会从待审核列表中移除。"
   },
-  bindWallet: { en: "Use Visitor MetaMask", zh: "使用访客自己的 MetaMask" },
+  bindWallet: { en: "Use Visitor Wallet", zh: "使用访客自己的钱包" },
   bindWalletNote: {
-    en: "This only connects the visitor's browser wallet. It does not connect the reviewer wallet.",
-    zh: "这只会连接当前访客浏览器里的钱包，不会连接审核钱包。"
+    en: "Visitors can use MetaMask, Rabby, or another injected EVM wallet. It does not connect the reviewer wallet.",
+    zh: "访客可以使用 MetaMask、Rabby 或其它注入式 EVM 钱包。这里不会连接审核钱包。"
   },
   websiteWallet: { en: "Submit Without Wallet", zh: "无钱包提交审核" },
   websiteWalletNote: {
-    en: "No MetaMask is needed. The application goes to the review queue, then the reviewer approves it from the admin site.",
-    zh: "访客不需要 MetaMask。申请会进入审核队列，之后你在后台用审核钱包批准。"
+    en: "No wallet is needed. The application goes to the review queue, then the reviewer approves it from the Review Center.",
+    zh: "访客不需要钱包。申请会进入审核队列，之后你在审核中心用审核钱包批准。"
   },
   deployDescription: {
     en: "Deploy with MetaMask. Your private key stays inside MetaMask and the deployed address is saved in this browser.",
     zh: "使用 MetaMask 部署。你的私钥只保存在 MetaMask 中，部署后的合约地址会保存在当前浏览器。"
   },
   deploymentChecklist: { en: "Deployment Checklist", zh: "部署检查清单" },
+  deployPagePrivateNote: {
+    en: "Review center only. This page is hidden from the public website.",
+    zh: "仅审核中心使用。该页面不会作为公开入口展示。"
+  },
   reviewerWallet: { en: "Reviewer Wallet", zh: "审核钱包" },
   connectedWallet: { en: "Connected Wallet", zh: "当前连接钱包" },
   deployWithMetaMask: { en: "Deploy with MetaMask", zh: "使用 MetaMask 部署" },
@@ -161,14 +170,14 @@ const dictionary: Dictionary = {
   saveContractLocal: { en: "Save contract address locally", zh: "保存合约地址到本地浏览器" },
   deploymentHistory: { en: "Local Deployment History", zh: "本地部署历史" },
   wrongReviewerWallet: { en: "Please switch MetaMask to the reviewer wallet before deployment.", zh: "请先在 MetaMask 切换到审核钱包后再部署。" },
-  adminPasswordTitle: { en: "Admin Access", zh: "后台访问" },
+  adminPasswordTitle: { en: "Review Center Access", zh: "审核中心访问" },
   adminPasswordDescription: {
     en: "Enter the admin password first. Approval still requires the reviewer MetaMask wallet.",
-    zh: "请先输入后台密码。真正批准时仍需要连接审核钱包。"
+    zh: "请先输入审核中心密码。真正批准时仍需要连接审核钱包。"
   },
-  adminPassword: { en: "Admin Password", zh: "后台密码" },
-  unlockAdmin: { en: "Enter Admin", zh: "进入后台" },
-  wrongAdminPassword: { en: "Incorrect admin password.", zh: "后台密码不正确。" },
+  adminPassword: { en: "Review Center Password", zh: "审核中心密码" },
+  unlockAdmin: { en: "Enter Review Center", zh: "进入审核中心" },
+  wrongAdminPassword: { en: "Incorrect review center password.", zh: "审核中心密码不正确。" },
   adminPasswordCheckFailed: { en: "Unable to check the password in this browser.", zh: "当前浏览器无法校验密码。" },
   checking: { en: "Checking...", zh: "校验中..." },
   deployed: { en: "Deployed", zh: "部署成功" },
@@ -183,14 +192,31 @@ const dictionary: Dictionary = {
   noLocalPending: { en: "No local website-wallet applications are waiting for review.", zh: "暂无网站钱包本地待审核申请。" },
   approveAndRegister: { en: "Approve & Register On Chain", zh: "批准并写入链上" },
   rejectApplication: { en: "Reject Application", zh: "拒绝申请" },
+  allWorksManagement: { en: "All Works Management", zh: "所有作品管理" },
+  allWorksManagementHint: {
+    en: "Blockchain records cannot be erased, but you can hide a certificate from this website's public demo views.",
+    zh: "链上记录不能被真正抹掉，但你可以把某个证书从本网站的公开展示中隐藏。"
+  },
+  hideFromSite: { en: "Hide from Site", zh: "从网站隐藏" },
+  hiddenFromSite: { en: "Hidden from Site", zh: "已从网站隐藏" },
+  confirmHideCertificate: {
+    en: "Hide this certificate from the public website? The blockchain transaction will still exist.",
+    zh: "确定把这个证书从公开网站隐藏吗？链上交易仍然会存在。"
+  },
+  noManagedWorks: { en: "No on-chain works found.", zh: "暂无链上作品。" },
   waitingReviewer: { en: "Waiting reviewer", zh: "等待审核" },
   applicationId: { en: "Application ID", zh: "申请编号" },
   certificateId: { en: "Certificate ID", zh: "版权编号" },
   transactionHash: { en: "Transaction Hash", zh: "链上交易编号" },
+  certificateTransactionHash: { en: "Certificate Tx Hash", zh: "证书交易 Hash" },
   registrationTransactionHash: { en: "Registration Tx Hash", zh: "登记交易 Hash" },
   approvalTransactionHash: { en: "Approval Tx Hash", zh: "审核交易 Hash" },
   transactionHashUnavailable: { en: "Not found from RPC", zh: "暂未从 RPC 读取到" },
-  fileSha256Hash: { en: "File SHA-256 Hash", zh: "文件 SHA-256 Hash" },
+  fileSha256Hash: { en: "File SHA-256 Fingerprint", zh: "文件 SHA-256 数字指纹" },
+  certificateProofNote: {
+    en: "The certificate transaction hash identifies the approval transaction. The file SHA-256 fingerprint identifies the file content, not a blockchain transaction.",
+    zh: "证书交易 Hash 指向审核通过这笔链上交易；文件 SHA-256 数字指纹用于识别文件内容，不是区块链交易。"
+  },
   reviewStatus: { en: "Review Status", zh: "审核状态" },
   approvedAt: { en: "Approved At", zh: "审核通过时间" },
   viewCertificate: { en: "View Certificate", zh: "查看证明" },
@@ -203,9 +229,15 @@ const dictionary: Dictionary = {
   registeredDate: { en: "Registered Date", zh: "登记时间" },
   smartContract: { en: "Smart Contract", zh: "智能合约" },
   copyCertificateLink: { en: "Copy Certificate Link", zh: "复制证明链接" },
+  downloadCertificateImage: { en: "Download Certificate Image", zh: "下载证书图片" },
+  certificateImageDownloadFailed: { en: "Unable to download certificate image.", zh: "无法下载证书图片。" },
   scanToVerify: { en: "Scan to verify this certificate", zh: "扫描验证该证明" },
   certificateNotFound: { en: "Certificate Not Found", zh: "未找到版权证明" },
   noBlockchainRecord: { en: "No blockchain record exists for this ID.", zh: "该编号不存在链上记录。" },
+  certificateHiddenBody: {
+    en: "This certificate has been hidden from the public demo website by the reviewer.",
+    zh: "该证书已被审核人从公开 demo 网站隐藏。"
+  },
   certificatePendingTitle: { en: "Certificate Not Issued Yet", zh: "证书尚未签发" },
   certificatePendingBody: {
     en: "This on-chain record exists, but it is still waiting for reviewer approval. A public certificate is only available after approval.",
@@ -238,7 +270,7 @@ const dictionary: Dictionary = {
   verified: { en: "Verified", zh: "验证成功" },
   noRecordFound: { en: "No Record Found", zh: "未找到记录" },
   noRecordFoundBody: { en: "This certificate ID does not exist.", zh: "该版权编号不存在。" },
-  viewExplorer: { en: "View on Explorer", zh: "在浏览器查看" },
+  viewExplorer: { en: "View in Discover", zh: "在发现查看" },
   discoverTitle: { en: "Discover Certificates", zh: "发现证书" },
   explorerDescription: {
     en: "Explore public approved copyright certificates from the blockchain.",

@@ -1,4 +1,4 @@
-import { Clock3, Copy, ShieldCheck } from "lucide-react";
+import { Clock3, Copy, Download, ShieldCheck } from "lucide-react";
 import { QRCodeCanvas } from "qrcode.react";
 import type { ReactNode } from "react";
 import logo from "../assets/logo.svg";
@@ -15,12 +15,23 @@ interface CertificateCardProps {
   approvalTransactionHash?: string;
   onCopyLink?: () => void;
   onVerify?: () => void;
+  onDownloadImage?: () => void;
 }
 
-export function CertificateCard({ record, registrationTransactionHash, approvalTransactionHash, onCopyLink, onVerify }: CertificateCardProps) {
+export function CertificateCard({
+  record,
+  registrationTransactionHash,
+  approvalTransactionHash,
+  onCopyLink,
+  onVerify,
+  onDownloadImage
+}: CertificateCardProps) {
   const { t } = useTranslation();
   const certificateId = formatCertificateId(record.id);
   const certificateUrl = getCertificateUrl(certificateId);
+  const certificateTransactionHash = record.approved
+    ? approvalTransactionHash || registrationTransactionHash || ""
+    : registrationTransactionHash || "";
 
   async function copyValue(value?: string) {
     if (value) {
@@ -69,17 +80,10 @@ export function CertificateCard({ record, registrationTransactionHash, approvalT
           <InfoSection title={t("blockchainProof")}>
             <InfoRow label={t("network")} value={NETWORK_NAME} />
             <InfoRow label={t("smartContract")} value={CONTRACT_ADDRESS ? formatAddress(CONTRACT_ADDRESS) : "Not deployed"} />
-            <InfoRow label={t("registrationTransactionHash")} value={registrationTransactionHash || t("transactionHashUnavailable")}>
-              {registrationTransactionHash ? (
-                <button type="button" className="text-brand-600" onClick={() => void copyValue(registrationTransactionHash)}>
-                  <Copy className="h-4 w-4" aria-label="Copy registration transaction hash" />
-                </button>
-              ) : null}
-            </InfoRow>
-            <InfoRow label={t("approvalTransactionHash")} value={approvalTransactionHash || t("transactionHashUnavailable")}>
-              {approvalTransactionHash ? (
-                <button type="button" className="text-brand-600" onClick={() => void copyValue(approvalTransactionHash)}>
-                  <Copy className="h-4 w-4" aria-label="Copy approval transaction hash" />
+            <InfoRow label={t("certificateTransactionHash")} value={certificateTransactionHash || t("transactionHashUnavailable")}>
+              {certificateTransactionHash ? (
+                <button type="button" className="text-brand-600" onClick={() => void copyValue(certificateTransactionHash)}>
+                  <Copy className="h-4 w-4" aria-label="Copy certificate transaction hash" />
                 </button>
               ) : null}
             </InfoRow>
@@ -88,6 +92,7 @@ export function CertificateCard({ record, registrationTransactionHash, approvalT
                 <Copy className="h-4 w-4" aria-label="Copy file hash" />
               </button>
             </InfoRow>
+            <p className="text-xs leading-5 text-ink-500">{t("certificateProofNote")}</p>
           </InfoSection>
         </div>
 
@@ -105,6 +110,10 @@ export function CertificateCard({ record, registrationTransactionHash, approvalT
               <button type="button" className="btn-secondary" onClick={onCopyLink}>
                 <Copy className="h-4 w-4" aria-hidden="true" />
                 {t("copyCertificateLink")}
+              </button>
+              <button type="button" className="btn-secondary" onClick={onDownloadImage}>
+                <Download className="h-4 w-4" aria-hidden="true" />
+                {t("downloadCertificateImage")}
               </button>
             </div>
           </div>

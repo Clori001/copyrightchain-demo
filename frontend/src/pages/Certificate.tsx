@@ -6,6 +6,8 @@ import { useCopyright } from "../hooks/useCopyright";
 import { useTranslation } from "../i18n";
 import type { CopyrightRecord } from "../types/copyright";
 import { formatCertificateId, getCertificateUrl, parseCertificateId } from "../utils/certificate";
+import { downloadCertificateImage } from "../utils/downloadCertificateImage";
+import { isCertificateHidden } from "../utils/hiddenCertificates";
 
 export function Certificate() {
   const { id = "" } = useParams();
@@ -17,6 +19,7 @@ export function Certificate() {
   const [approvalTransactionHash, setApprovalTransactionHash] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [downloadError, setDownloadError] = useState("");
   const [copied, setCopied] = useState(false);
 
   async function loadCertificate() {
@@ -30,6 +33,7 @@ export function Certificate() {
 
     setLoading(true);
     setError("");
+    setRecord(null);
 
     try {
       const [copyrightRecord, registrationHash, approvalHash] = await Promise.all([
@@ -37,6 +41,12 @@ export function Certificate() {
         copyright.getTransactionHashForId(numericId),
         copyright.getApprovalTransactionHashForId(numericId)
       ]);
+
+      if (await isCertificateHidden(numericId)) {
+        setError(t("certificateHiddenBody"));
+        return;
+      }
+
       setRecord(copyrightRecord);
       setRegistrationTransactionHash(registrationHash);
       setApprovalTransactionHash(approvalHash);
@@ -59,6 +69,41 @@ export function Certificate() {
     await navigator.clipboard.writeText(getCertificateUrl(formatCertificateId(record.id)));
     setCopied(true);
     window.setTimeout(() => setCopied(false), 1400);
+  }
+
+  async function handleDownloadImage() {
+    if (!record) {
+      return;
+    }
+
+    setDownloadError("");
+
+    try {
+      const certificateTransactionHash = record.approved
+        ? approvalTransactionHash || registrationTransactionHash
+        : registrationTransactionHash;
+
+      await downloadCertificateImage({
+        record,
+        certificateTransactionHash,
+        labels: {
+          title: t("digitalCertificate"),
+          verified: t("verifiedOnChain"),
+          certificateId: t("certificateId"),
+          workTitle: t("workTitle"),
+          creator: t("creator"),
+          category: t("category"),
+          registeredDate: t("registeredDate"),
+          approvedAt: t("approvedAt"),
+          network: t("network"),
+          smartContract: t("smartContract"),
+          certificateTransactionHash: t("certificateTransactionHash"),
+          fileSha256Hash: t("fileSha256Hash")
+        }
+      });
+    } catch {
+      setDownloadError(t("certificateImageDownloadFailed"));
+    }
   }
 
   if (loading) {
@@ -129,12 +174,16 @@ export function Certificate() {
         </Link>
         {copied ? <span className="rounded-full bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-700">Link copied</span> : null}
       </div>
+      {downloadError ? (
+        <p className="mb-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">{downloadError}</p>
+      ) : null}
       <CertificateCard
         record={record}
         registrationTransactionHash={registrationTransactionHash}
         approvalTransactionHash={approvalTransactionHash}
         onCopyLink={() => void copyLink()}
         onVerify={() => void loadCertificate()}
+        onDownloadImage={() => void handleDownloadImage()}
       />
     </div>
   );

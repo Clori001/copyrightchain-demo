@@ -13,6 +13,7 @@ const txKey = (id: number) => `copyrightchain:tx:${id}`;
 const approvalTxKey = (id: number) => `copyrightchain:approval-tx:${id}`;
 const recordKey = (id: number) => `copyrightchain:record:${id}`;
 const websiteApplicationsKey = "copyrightchain:website-applications";
+const hiddenCertificatesKey = "copyrightchain:hidden-certificates";
 
 export function savePreview(preview: StoredPreview) {
   localStorage.setItem(previewKey(preview.id), JSON.stringify(preview));
@@ -92,6 +93,27 @@ export function updateWebsiteApplication(localId: string, update: Partial<Websit
   );
   localStorage.setItem(websiteApplicationsKey, JSON.stringify(updatedApplications));
   return updatedApplications.find((application) => application.localId === localId) || null;
+}
+
+export function getHiddenCertificateIds() {
+  const raw = localStorage.getItem(hiddenCertificatesKey);
+
+  if (!raw) {
+    return [];
+  }
+
+  try {
+    const ids = JSON.parse(raw) as number[];
+    return ids.filter((id) => Number.isFinite(id));
+  } catch {
+    return [];
+  }
+}
+
+export function hideCertificateLocally(id: number) {
+  const ids = new Set(getHiddenCertificateIds());
+  ids.add(id);
+  localStorage.setItem(hiddenCertificatesKey, JSON.stringify(Array.from(ids)));
 }
 
 export async function fileToPreview(file: File) {

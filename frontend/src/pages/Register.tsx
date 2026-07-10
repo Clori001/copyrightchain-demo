@@ -1,4 +1,4 @@
-import { CheckCircle2, CloudUpload, Loader2, Wallet } from "lucide-react";
+import { CheckCircle2, CloudUpload, Info, Loader2, Wallet } from "lucide-react";
 import { ChangeEvent, DragEvent, FormEvent, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { HashDisplay } from "../components/HashDisplay";
@@ -296,6 +296,13 @@ export function Register() {
 
         <section className="panel p-5">
           <h2 className="mb-4 text-lg font-bold text-ink-900">Step 2 · {t("workInformation")}</h2>
+          <div className="mb-4 flex gap-3 rounded-lg border border-brand-100 bg-brand-50 p-4 text-sm leading-6 text-ink-600">
+            <Info className="mt-0.5 h-5 w-5 shrink-0 text-brand-600" aria-hidden="true" />
+            <div>
+              <p className="font-bold text-ink-900">{t("publicRegistrationNoticeTitle")}</p>
+              <p className="mt-1">{t("publicRegistrationNoticeBody")}</p>
+            </div>
+          </div>
           <div className="grid gap-4 md:grid-cols-2">
             <label>
               <span className="label">{t("workTitle")} *</span>

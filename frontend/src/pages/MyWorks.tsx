@@ -1,4 +1,4 @@
-import { CircleAlert, Loader2, RefreshCcw } from "lucide-react";
+import { CircleAlert, Loader2, RefreshCcw, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import emptyPortfolio from "../assets/empty-portfolio.svg";
@@ -10,6 +10,7 @@ import { useTranslation } from "../i18n";
 import type { CopyrightRecord, WebsiteApplication, WebsiteApplicationStatus } from "../types/copyright";
 import { formatCertificateId, formatDate } from "../utils/certificate";
 import { getPreview, getWebsiteApplications, updateWebsiteApplication } from "../utils/localPreview";
+import { hideCertificateFromSite, listHiddenCertificateIds } from "../utils/hiddenCertificates";
 import { isSupabaseConfigured, listSupabaseApplications } from "../utils/supabaseApplications";
 
 const filters = ["All Works", "Photography", "Image", "Music", "Writing", "Code", "Design", "Other"];
@@ -23,6 +24,7 @@ export function MyWorks() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [websiteApplications, setWebsiteApplications] = useState<WebsiteApplication[]>([]);
+  const [hiddenCertificateIds, setHiddenCertificateIds] = useState<number[]>([]);
 
   const filteredWebsiteApplications = useMemo(() => {
     if (filter === "All Works") {
@@ -38,8 +40,13 @@ export function MyWorks() {
   );
 
   const approvedApplications = useMemo(
-    () => filteredWebsiteApplications.filter((application) => application.status === "approved"),
-    [filteredWebsiteApplications]
+    () =>
+      filteredWebsiteApplications.filter(
+        (application) =>
+          application.status === "approved" &&
+          (!application.certificateId || !hiddenCertificateIds.includes(application.certificateId))
+      ),
+    [filteredWebsiteApplications, hiddenCertificateIds]
   );
 
   const filteredRecords = useMemo(() => {
@@ -86,6 +93,8 @@ export function MyWorks() {
   }
 
   async function loadRecords() {
+    const hiddenIds = await listHiddenCertificateIds();
+    setHiddenCertificateIds(hiddenIds);
     setWebsiteApplications(await loadWebsiteApplications());
 
     if (!wallet.isConnected || !isContractConfigured) {
@@ -98,7 +107,7 @@ export function MyWorks() {
     try {
       const ids = await copyright.getMyCopyrights();
       const loadedRecords = await Promise.all(ids.map((id) => copyright.getCopyright(id)));
-      setRecords(loadedRecords.sort((a, b) => b.id - a.id));
+      setRecords(loadedRecords.filter((record) => !hiddenIds.includes(record.id)).sort((a, b) => b.id - a.id));
     } catch (recordsError) {
       setError(recordsError instanceof Error ? recordsError.message : "Unable to load records.");
     } finally {
@@ -109,6 +118,19 @@ export function MyWorks() {
   useEffect(() => {
     void loadRecords();
   }, [wallet.account]);
+
+  async function hideApprovedApplication(application: WebsiteApplication) {
+    if (!window.confirm(t("confirmHideCertificate"))) {
+      return;
+    }
+
+    if (application.certificateId) {
+      await hideCertificateFromSite(application.certificateId, wallet.account);
+    }
+
+    updateWebsiteApplication(application.localId, { status: "hidden" });
+    await loadRecords();
+  }
 
   return (
     <div className="page-shell">
@@ -156,7 +178,11 @@ export function MyWorks() {
         {approvedApplications.length ? (
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {approvedApplications.map((application) => (
-              <WebsiteApplicationCard key={application.localId} application={application} />
+              <WebsiteApplicationCard
+                key={application.localId}
+                application={application}
+                onHide={() => void hideApprovedApplication(application)}
+              />
             ))}
           </div>
         ) : (
@@ -226,7 +252,7 @@ export function MyWorks() {
   );
 }
 
-function WebsiteApplicationCard({ application }: { application: WebsiteApplication }) {
+function WebsiteApplicationCard({ application, onHide }: { application: WebsiteApplication; onHide?: () => void }) {
   const { t } = useTranslation();
 
   return (
@@ -250,9 +276,17 @@ function WebsiteApplicationCard({ application }: { application: WebsiteApplicati
         <div className="mt-4 flex items-center justify-between gap-3">
           <ApplicationStatusBadge status={application.status} />
           {application.status === "approved" && application.certificateId ? (
-            <Link className="btn-secondary px-3 py-1.5 text-xs" to={`/certificate/${formatCertificateId(application.certificateId)}`}>
-              {t("viewCertificate")}
-            </Link>
+            <div className="flex flex-wrap justify-end gap-2">
+              <Link className="btn-secondary px-3 py-1.5 text-xs" to={`/certificate/${formatCertificateId(application.certificateId)}`}>
+                {t("viewCertificate")}
+              </Link>
+              {onHide ? (
+                <button type="button" className="btn-danger px-3 py-1.5 text-xs" onClick={onHide}>
+                  <Trash2 className="h-4 w-4" aria-hidden="true" />
+                  {t("hideFromSite")}
+                </button>
+              ) : null}
+            </div>
           ) : (
             <span className="text-xs font-semibold text-ink-500">
               {application.status === "rejected" ? t("rejected") : t("waitingReviewer")}
@@ -274,11 +308,18 @@ function ApplicationStatusBadge({ status }: { status: WebsiteApplicationStatus }
   const className =
     status === "approved"
       ? "bg-emerald-50 text-emerald-700"
-      : status === "rejected"
+      : status === "rejected" || status === "hidden"
         ? "bg-red-50 text-red-700"
         : "bg-amber-50 text-amber-700";
 
-  const label = status === "approved" ? t("approved") : status === "rejected" ? t("rejected") : t("pendingReview");
+  const label =
+    status === "approved"
+      ? t("approved")
+      : status === "hidden"
+        ? t("hiddenFromSite")
+        : status === "rejected"
+          ? t("rejected")
+          : t("pendingReview");
 
   return <span className={`rounded-md px-3 py-1 text-xs font-bold ${className}`}>{label}</span>;
 }

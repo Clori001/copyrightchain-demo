@@ -6,6 +6,7 @@ import { useTranslation } from "../i18n";
 import type { CopyrightRecord } from "../types/copyright";
 import { formatCertificateId, formatDate, parseCertificateId } from "../utils/certificate";
 import { formatAddress, formatHash } from "../utils/formatAddress";
+import { isCertificateHidden } from "../utils/hiddenCertificates";
 
 export function Verify() {
   const { id } = useParams();
@@ -13,7 +14,7 @@ export function Verify() {
   const copyright = useCopyright();
   const [input, setInput] = useState(id || "CC-000001");
   const [record, setRecord] = useState<CopyrightRecord | null>(null);
-  const [transactionHash, setTransactionHash] = useState("");
+  const [certificateTransactionHash, setCertificateTransactionHash] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -22,7 +23,7 @@ export function Verify() {
     const numericId = parseCertificateId(certificateValue);
 
     setRecord(null);
-    setTransactionHash("");
+    setCertificateTransactionHash("");
     setError("");
 
     if (!numericId) {
@@ -33,12 +34,19 @@ export function Verify() {
     setLoading(true);
 
     try {
-      const [copyrightRecord, hash] = await Promise.all([
+      const [copyrightRecord, registrationHash, approvalHash] = await Promise.all([
         copyright.getCopyright(numericId),
-        copyright.getTransactionHashForId(numericId)
+        copyright.getTransactionHashForId(numericId),
+        copyright.getApprovalTransactionHashForId(numericId)
       ]);
+
+      if (await isCertificateHidden(numericId)) {
+        setError(t("certificateHiddenBody"));
+        return;
+      }
+
       setRecord(copyrightRecord);
-      setTransactionHash(hash);
+      setCertificateTransactionHash(copyrightRecord.approved ? approvalHash || registrationHash : registrationHash);
     } catch {
       setError(t("noRecordFoundBody"));
     } finally {
@@ -104,9 +112,12 @@ export function Verify() {
               <VerifyRow label="Creator Wallet" value={formatAddress(record.creator)} />
               <VerifyRow label={t("timestamp")} value={formatDate(record.timestamp)} />
               <VerifyRow label="Review Status" value={record.approved ? t("approved") : t("pendingReview")} />
+              <VerifyRow label={t("certificateTransactionHash")} value={certificateTransactionHash ? formatHash(certificateTransactionHash) : t("transactionHashUnavailable")} />
               <VerifyRow label={t("fileSha256Hash")} value={formatHash(record.fileHash)} />
-              <VerifyRow label={t("registrationTransactionHash")} value={transactionHash ? formatHash(transactionHash) : t("transactionHashUnavailable")} />
             </dl>
+            <p className="mt-4 rounded-lg border border-brand-100 bg-brand-50 p-3 text-xs leading-5 text-ink-500">
+              {t("certificateProofNote")}
+            </p>
             <div className="mt-6 rounded-lg border border-brand-100 bg-brand-50 p-4 text-sm text-ink-500">
               You can view this record on the blockchain explorer.
               <Link className="ml-3 font-semibold text-brand-600" to="/explorer">

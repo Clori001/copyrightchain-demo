@@ -1,4 +1,4 @@
-import { CircleAlert, Loader2, RefreshCcw, ShieldCheck, XCircle } from "lucide-react";
+import { CircleAlert, Loader2, RefreshCcw, ShieldCheck, Trash2, XCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { WorkPreview } from "../components/WorkPreview";
@@ -9,6 +9,7 @@ import { useTranslation } from "../i18n";
 import type { CopyrightRecord, TransactionStage, WebsiteApplication } from "../types/copyright";
 import { formatCertificateId, formatDate } from "../utils/certificate";
 import { formatAddress, formatHash } from "../utils/formatAddress";
+import { hideCertificateFromSite, listHiddenCertificateIds } from "../utils/hiddenCertificates";
 import {
   getPreview,
   getWebsiteApplications,
@@ -29,6 +30,8 @@ export function Review() {
   const wallet = useWallet();
   const copyright = useCopyright();
   const [pendingRecords, setPendingRecords] = useState<CopyrightRecord[]>([]);
+  const [allRecords, setAllRecords] = useState<CopyrightRecord[]>([]);
+  const [hiddenCertificateIds, setHiddenCertificateIds] = useState<number[]>([]);
   const [websiteApplications, setWebsiteApplications] = useState<WebsiteApplication[]>([]);
   const [loading, setLoading] = useState(false);
   const [processingId, setProcessingId] = useState("");
@@ -40,6 +43,7 @@ export function Review() {
   async function loadReviewQueue() {
     if (!wallet.isConnected || !isReviewerAddress(wallet.account)) {
       setPendingRecords([]);
+      setAllRecords([]);
       setWebsiteApplications([]);
       setLoading(false);
       return;
@@ -59,10 +63,26 @@ export function Review() {
     }
 
     try {
+      const hiddenIds = await listHiddenCertificateIds();
+      setHiddenCertificateIds(hiddenIds);
+
       if (isContractConfigured) {
-        const ids = await copyright.getPendingCopyrights();
-        const records = await Promise.all(ids.map((id) => copyright.getCopyright(id)));
-        setPendingRecords(records.sort((a, b) => b.id - a.id));
+        const totalWorks = await copyright.getTotalWorks();
+        const ids = Array.from({ length: Math.min(totalWorks, 100) }, (_, index) => totalWorks - index);
+        const records = await Promise.all(
+          ids.map(async (id) => {
+            try {
+              return await copyright.getCopyright(id);
+            } catch {
+              return null;
+            }
+          })
+        );
+        const loadedRecords = records.filter((record): record is CopyrightRecord => Boolean(record)).sort((a, b) => b.id - a.id);
+        setAllRecords(loadedRecords);
+        setPendingRecords(
+          loadedRecords.filter((record) => !record.approved && !hiddenIds.includes(record.id))
+        );
       }
     } catch (queueError) {
       setError(queueError instanceof Error ? queueError.message : "Unable to load review queue.");
@@ -176,6 +196,25 @@ export function Review() {
     }
   }
 
+  async function hideCertificate(record: CopyrightRecord) {
+    if (!window.confirm(t("confirmHideCertificate"))) {
+      return;
+    }
+
+    setError("");
+    setProcessingId(`hide-${record.id}`);
+
+    try {
+      await hideCertificateFromSite(record.id, wallet.account);
+      await loadReviewQueue();
+    } catch (hideError) {
+      setError(hideError instanceof Error ? hideError.message : "Unable to hide certificate.");
+    } finally {
+      setProcessingId("");
+      setStage("idle");
+    }
+  }
+
   return (
     <div className="page-shell">
       <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
@@ -260,7 +299,7 @@ export function Review() {
             )}
           </section>
 
-          <section>
+          <section className="mb-6">
             <h2 className="mb-3 text-lg font-bold text-ink-900">
               {t("websiteWallet")} · {isSupabaseConfigured ? "Supabase Applications" : t("localApplications")}
             </h2>
@@ -314,6 +353,60 @@ export function Review() {
               </div>
             ) : (
               <div className="panel p-5 text-sm text-ink-500">{t("noLocalPending")}</div>
+            )}
+          </section>
+
+          <section>
+            <div className="mb-3">
+              <h2 className="text-lg font-bold text-ink-900">{t("allWorksManagement")}</h2>
+              <p className="mt-1 text-xs leading-5 text-ink-500">{t("allWorksManagementHint")}</p>
+            </div>
+            {allRecords.length ? (
+              <div className="grid gap-4 lg:grid-cols-2">
+                {allRecords.map((record) => {
+                  const hidden = hiddenCertificateIds.includes(record.id);
+
+                  return (
+                    <article key={record.id} className="panel grid gap-4 p-4 sm:grid-cols-[130px_1fr]">
+                      <WorkPreview category={record.category} preview={getPreview(record.id)} alt={record.title} size="sm" />
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-start justify-between gap-2">
+                          <div>
+                            <h3 className="font-bold text-ink-900">{record.title}</h3>
+                            <p className="mt-1 text-sm text-ink-500">
+                              {formatCertificateId(record.id)} · {record.category} · {formatDate(record.timestamp)}
+                            </p>
+                          </div>
+                          <span
+                            className={`rounded-md px-2 py-1 text-xs font-bold ${
+                              hidden
+                                ? "bg-red-50 text-red-700"
+                                : record.approved
+                                  ? "bg-emerald-50 text-emerald-700"
+                                  : "bg-amber-50 text-amber-700"
+                            }`}
+                          >
+                            {hidden ? t("hiddenFromSite") : record.approved ? t("approved") : t("pendingReview")}
+                          </span>
+                        </div>
+                        <p className="mt-2 break-all text-xs text-ink-500">Hash: {formatHash(record.fileHash)}</p>
+                        <p className="mt-1 text-xs text-ink-500">Creator: {formatAddress(record.creator)}</p>
+                        <button
+                          type="button"
+                          className="mt-4 btn-danger px-4 py-2 text-xs"
+                          disabled={hidden || Boolean(processingId)}
+                          onClick={() => void hideCertificate(record)}
+                        >
+                          {processingId === `hide-${record.id}` ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                          {hidden ? t("hiddenFromSite") : t("hideFromSite")}
+                        </button>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="panel p-5 text-sm text-ink-500">{t("noManagedWorks")}</div>
             )}
           </section>
         </>

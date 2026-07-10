@@ -18,9 +18,17 @@ interface SupabaseApplicationRow {
   approved_at: string | null;
 }
 
+interface SupabaseHiddenCertificateRow {
+  certificate_id: number;
+  reviewer_wallet: string | null;
+  reason: string;
+  hidden_at: string;
+}
+
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL?.replace(/\/$/, "") || "";
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "";
 const TABLE = "copyright_applications";
+const HIDDEN_TABLE = "hidden_certificates";
 
 export const isSupabaseConfigured = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
 
@@ -35,6 +43,10 @@ function headers(prefer?: string) {
 
 function endpoint(query = "") {
   return `${SUPABASE_URL}/rest/v1/${TABLE}${query}`;
+}
+
+function hiddenEndpoint(query = "") {
+  return `${SUPABASE_URL}/rest/v1/${HIDDEN_TABLE}${query}`;
 }
 
 function toApplication(row: SupabaseApplicationRow): WebsiteApplication {
@@ -137,4 +149,55 @@ export async function updateSupabaseApplication(
   );
 
   return rows[0] ? toApplication(rows[0]) : null;
+}
+
+export async function updateSupabaseApplicationsByCertificateId(
+  certificateId: number,
+  update: {
+    status?: WebsiteApplicationStatus;
+    reviewerWallet?: string;
+  }
+) {
+  const rows = await request<SupabaseApplicationRow[]>(
+    endpoint(`?certificate_id=eq.${certificateId}`),
+    {
+      method: "PATCH",
+      headers: headers("return=representation"),
+      body: JSON.stringify({
+        status: update.status,
+        reviewer_wallet: update.reviewerWallet
+      })
+    }
+  );
+
+  return rows.map(toApplication);
+}
+
+export async function listSupabaseHiddenCertificateIds() {
+  const rows = await request<SupabaseHiddenCertificateRow[]>(
+    hiddenEndpoint("?select=certificate_id"),
+    {
+      method: "GET",
+      headers: headers()
+    }
+  );
+
+  return rows.map((row) => Number(row.certificate_id)).filter((id) => Number.isFinite(id));
+}
+
+export async function hideSupabaseCertificate(certificateId: number, reviewerWallet?: string) {
+  const rows = await request<SupabaseHiddenCertificateRow[]>(
+    hiddenEndpoint("?on_conflict=certificate_id"),
+    {
+      method: "POST",
+      headers: headers("resolution=merge-duplicates,return=representation"),
+      body: JSON.stringify({
+        certificate_id: certificateId,
+        reviewer_wallet: reviewerWallet || null,
+        reason: "hidden_from_demo"
+      })
+    }
+  );
+
+  return rows[0] || null;
 }

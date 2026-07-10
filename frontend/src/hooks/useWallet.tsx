@@ -39,7 +39,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
   const getBrowserProvider = useCallback(() => {
     if (!window.ethereum) {
-      throw new Error("MetaMask is not available in this browser.");
+      throw new Error("No compatible EVM wallet is available in this browser.");
     }
 
     return new BrowserProvider(window.ethereum);
@@ -64,7 +64,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
   const connectWallet = useCallback(async () => {
     if (!window.ethereum) {
-      setError("MetaMask is not available in this browser.");
+      setError("No compatible EVM wallet is available in this browser.");
       return null;
     }
 
@@ -85,7 +85,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
   const switchNetwork = useCallback(async () => {
     if (!window.ethereum) {
-      setError("MetaMask is not available in this browser.");
+      setError("No compatible EVM wallet is available in this browser.");
       return;
     }
 

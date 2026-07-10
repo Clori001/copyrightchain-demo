@@ -33,7 +33,7 @@ export interface RegistrationEvent {
   transactionHash: string;
 }
 
-export type WebsiteApplicationStatus = "pending" | "approved" | "rejected";
+export type WebsiteApplicationStatus = "pending" | "approved" | "rejected" | "hidden";
 
 export interface WebsiteApplication {
   localId: string;

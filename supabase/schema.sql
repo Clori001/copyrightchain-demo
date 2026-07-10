@@ -23,7 +23,7 @@ drop constraint if exists copyright_applications_status_check;
 
 alter table public.copyright_applications
 add constraint copyright_applications_status_check
-check (status in ('pending', 'approved', 'rejected'));
+check (status in ('pending', 'approved', 'rejected', 'hidden'));
 
 alter table public.copyright_applications enable row level security;
 
@@ -56,8 +56,41 @@ for update
 to anon, authenticated
 using (true)
 with check (
-  status in ('pending', 'approved', 'rejected')
+  status in ('pending', 'approved', 'rejected', 'hidden')
 );
 
 create index if not exists copyright_applications_status_created_idx
 on public.copyright_applications (status, created_at desc);
+
+create table if not exists public.hidden_certificates (
+  certificate_id bigint primary key,
+  reviewer_wallet text,
+  reason text not null default 'hidden_from_demo',
+  hidden_at timestamptz not null default now()
+);
+
+alter table public.hidden_certificates enable row level security;
+
+drop policy if exists "Public demo can read hidden certificates" on public.hidden_certificates;
+create policy "Public demo can read hidden certificates"
+on public.hidden_certificates
+for select
+to anon, authenticated
+using (true);
+
+-- Demo-only public insert policy.
+-- For production, protect this behind a Supabase Edge Function.
+drop policy if exists "Public demo can hide certificates" on public.hidden_certificates;
+create policy "Public demo can hide certificates"
+on public.hidden_certificates
+for insert
+to anon, authenticated
+with check (certificate_id > 0);
+
+drop policy if exists "Public demo can update hidden certificates" on public.hidden_certificates;
+create policy "Public demo can update hidden certificates"
+on public.hidden_certificates
+for update
+to anon, authenticated
+using (true)
+with check (certificate_id > 0);

@@ -93,7 +93,7 @@ export function Deploy() {
     <div className="page-shell">
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-ink-900">{t("deploy")} CopyrightRegistry</h1>
-        <p className="mt-2 text-sm text-ink-500">Admin only. This page is hidden from the public website.</p>
+        <p className="mt-2 text-sm text-ink-500">{t("deployPagePrivateNote")}</p>
       </div>
 
       {!wallet.isConnected ? (

@@ -149,18 +149,18 @@ Public pages:
 
 公开页面包括登记、验证、我的作品和发现页。
 
-Password-gated admin pages on the same site:
+Password-gated Review Center pages on the same site:
 
 ```text
 https://copyrightchain-public.vercel.app/admin/deploy
 https://copyrightchain-public.vercel.app/admin/review
 ```
 
-The admin password gate is only a lightweight demo barrier. Real approval is still protected by the reviewer MetaMask wallet. If the Register page shows `Not deployed`, the wallet/network is not the problem; the public Vercel app still needs a contract address.
+The Review Center password gate is only a lightweight demo barrier. Real approval is still protected by the reviewer MetaMask wallet. If the Register page shows `Not deployed`, the wallet/network is not the problem; the public Vercel app still needs a contract address.
 
 Deploy the smart contract from `https://copyrightchain-public.vercel.app/admin/deploy`, then add the deployed address to `VITE_CONTRACT_ADDRESS` in Vercel and redeploy.
 
-后台密码只是 demo 级别的轻量访问控制。真正的审核批准仍由审核钱包 MetaMask 保护。如果登记页显示 `Not deployed`，通常不是钱包或网络问题，而是 Vercel 还没有配置合约地址。
+审核中心密码只是 demo 级别的轻量访问控制。真正的审核批准仍由审核钱包 MetaMask 保护。如果登记页显示 `Not deployed`，通常不是钱包或网络问题，而是 Vercel 还没有配置合约地址。
 
 从 `https://copyrightchain-public.vercel.app/admin/deploy` 部署合约后，把合约地址填入 Vercel 的 `VITE_CONTRACT_ADDRESS` 并重新部署。
 
@@ -194,17 +194,17 @@ VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_ANON_KEY=your-anon-public-key
 ```
 
-After this, `Submit Without Wallet` submissions go to Supabase instead of browser-only storage. The reviewer can open `/admin/review`, enter the admin password, and approve them with MetaMask.
+After this, `Submit Without Wallet` submissions go to Supabase instead of browser-only storage. The reviewer can open `/admin/review`, enter the Review Center password, and approve or hide records with MetaMask.
 
-完成后，`Submit Without Wallet / 无钱包提交审核` 会进入 Supabase 队列，而不是只存在浏览器本地。审核人可以打开 `/admin/review`，输入后台密码，再用审核钱包批准或拒绝申请。
+完成后，`Submit Without Wallet / 无钱包提交审核` 会进入 Supabase 队列，而不是只存在浏览器本地。审核人可以打开 `/admin/review`，输入审核中心密码，再用审核钱包批准、拒绝或隐藏记录。
 
 The included Supabase policies are intentionally public for a university demo. For production, move approval updates behind a Supabase Edge Function that verifies a reviewer MetaMask signature.
 
 Supabase policy 是为了课堂 demo 故意开放的。生产环境应改为 Supabase Edge Function，并验证审核钱包签名后再允许更新审核结果。
 
-If you already created the Supabase table before the reject feature was added, run `supabase/schema.sql` again in the Supabase SQL Editor so the `rejected` status is allowed.
+If you already created the Supabase table before the reject/hide features were added, run `supabase/schema.sql` again in the Supabase SQL Editor so the `rejected` and `hidden` statuses plus the `hidden_certificates` table are available.
 
-如果你是在加入“拒绝”按钮前创建的 Supabase 表，请在 Supabase SQL Editor 里重新运行 `supabase/schema.sql`，这样数据库才允许 `rejected / 已拒绝` 状态。
+如果你是在加入“拒绝/隐藏”功能前创建的 Supabase 表，请在 Supabase SQL Editor 里重新运行 `supabase/schema.sql`，这样数据库才允许 `rejected / 已拒绝`、`hidden / 已隐藏` 状态，并创建 `hidden_certificates` 表。
 
 ## Public Deployment + Review Flow / 公开部署与审核流程
 
@@ -221,32 +221,32 @@ Site: https://copyrightchain-public.vercel.app
 ```
 
 1. Open `https://copyrightchain-public.vercel.app/admin/deploy`.
-2. Enter the admin password.
+2. Enter the Review Center password.
 3. Connect MetaMask with the reviewer wallet.
 4. Click `Deploy with MetaMask` and approve the deployment transaction.
 5. Copy the deployed contract address into `VITE_CONTRACT_ADDRESS` in Vercel, then redeploy.
 6. Share `https://copyrightchain-public.vercel.app/register`.
 7. Users can choose:
-   - `Use Visitor MetaMask`: submit an on-chain pending application from the visitor wallet.
+   - `Use Visitor Wallet`: submit an on-chain pending application from the visitor's injected EVM wallet, such as MetaMask or Rabby.
    - `Submit Without Wallet`: submit a pending application to the Supabase review queue.
-8. Open `https://copyrightchain-public.vercel.app/admin/review`, enter the admin password, and approve applications with the reviewer wallet.
+8. Open `https://copyrightchain-public.vercel.app/admin/review`, enter the Review Center password, and approve, reject, or hide applications with the reviewer wallet.
 
 Only approved applications are shown as verified certificates.
 
 中文流程：
 
 1. 打开 `https://copyrightchain-public.vercel.app/admin/deploy`。
-2. 输入后台密码。
+2. 输入审核中心密码。
 3. 使用审核钱包连接 MetaMask。
 4. 点击 `Deploy with MetaMask / 使用 MetaMask 部署` 并确认交易。
 5. 把部署出的合约地址写入 Vercel 的 `VITE_CONTRACT_ADDRESS`，然后重新部署。
 6. 分享 `https://copyrightchain-public.vercel.app/register`。
 7. 用户可以选择：
-   - `Use Visitor MetaMask / 使用访客自己的 MetaMask`：由访客钱包提交链上待审核申请。
+   - `Use Visitor Wallet / 使用访客自己的钱包`：由访客的注入式 EVM 钱包提交链上待审核申请，例如 MetaMask 或 Rabby。
    - `Submit Without Wallet / 无钱包提交审核`：提交到 Supabase 审核队列。
-8. 打开 `https://copyrightchain-public.vercel.app/admin/review`，输入后台密码，用审核钱包批准或拒绝申请。
+8. 打开 `https://copyrightchain-public.vercel.app/admin/review`，输入审核中心密码，用审核钱包批准、拒绝或隐藏申请。
 
-只有审核通过的申请会显示为已验证证书。
+只有审核通过且未被隐藏的申请会显示为已验证证书。链上记录不可删除，隐藏只影响本网站的公开展示。
 
 For local development, run `npm run dev` in `frontend/` and open the Vite dev URL printed in the terminal.
 

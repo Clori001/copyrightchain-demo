@@ -7,6 +7,7 @@ import { useTranslation } from "../i18n";
 import type { CopyrightRecord } from "../types/copyright";
 import { formatCertificateId, formatDate } from "../utils/certificate";
 import { formatAddress, formatHash } from "../utils/formatAddress";
+import { listHiddenCertificateIds } from "../utils/hiddenCertificates";
 
 const PUBLIC_CERTIFICATE_LIMIT = 50;
 
@@ -26,14 +27,18 @@ export function Explorer() {
 
     async function loadExplorer() {
       setLoading(true);
-      const count = await copyright.getTotalWorks().catch(() => 0);
+      const [count, hiddenIds] = await Promise.all([
+        copyright.getTotalWorks().catch(() => 0),
+        listHiddenCertificateIds().catch(() => [])
+      ]);
+      const hiddenIdSet = new Set(hiddenIds);
       const ids = Array.from({ length: Math.min(count, PUBLIC_CERTIFICATE_LIMIT) }, (_, index) => count - index);
       const detailedRecords = await Promise.all(
         ids.map(async (id) => {
           try {
             const record = await copyright.getCopyright(id);
 
-            if (!record.approved) {
+            if (!record.approved || hiddenIdSet.has(record.id)) {
               return null;
             }
 
@@ -45,9 +50,13 @@ export function Explorer() {
         })
       );
 
+      const publicRecords = detailedRecords
+        .filter((record): record is ExplorerRecord => Boolean(record))
+        .sort((a, b) => b.id - a.id);
+
       if (active) {
-        setTotalWorks(count);
-        setRecords(detailedRecords.filter((record): record is ExplorerRecord => Boolean(record)).sort((a, b) => b.id - a.id));
+        setTotalWorks(publicRecords.length);
+        setRecords(publicRecords);
         setLoading(false);
       }
     }
