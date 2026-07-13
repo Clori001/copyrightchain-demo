@@ -22,6 +22,24 @@ It demonstrates how a creator can:
 3. 获得 `CC-000001` 这样的证书编号。
 4. 让其他人通过公开页面验证链上记录。
 
+## Product Demo / 产品演示
+
+### Homepage and testnet workflow / 首页与测试网流程
+
+![CopyrightChain homepage on Monad Testnet](docs/screenshots/homepage.png)
+
+The homepage presents the registration and verification entry points, the active Monad Testnet status, and a clear notice that the project is an educational prototype rather than a legal copyright service.
+
+首页展示版权登记、版权验证入口和 Monad Testnet 运行状态，并明确说明本项目是学习演示原型，不提供法律意义上的版权保护。
+
+### Verifiable on-chain certificate / 可验证的链上证书
+
+![CopyrightChain verified digital copyright certificate](docs/screenshots/verified-certificate.png)
+
+An approved record produces a certificate view containing the certificate ID, creator wallet, registration time, contract address, transaction hash, and local SHA-256 file fingerprint. Visitors can follow the verification link or scan the QR code to inspect the public testnet record.
+
+审核通过的记录会生成证书页面，展示证书编号、创作者钱包、登记时间、合约地址、交易哈希和在本地生成的文件 SHA-256 数字指纹。访客可以通过验证链接或二维码查看公开测试网记录。
+
 ## Important Demo Notice / 重要说明
 
 This application is a prototype deployed on a blockchain testnet for educational and demonstration purposes only.
