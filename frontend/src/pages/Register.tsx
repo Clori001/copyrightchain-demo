@@ -194,6 +194,9 @@ export function Register() {
         }
       );
 
+      // Everything below is optional browser-side caching. The transaction has
+      // already succeeded, so storage limits or a read-RPC hiccup must not turn
+      // the confirmed registration into a misleading "Transaction failed" UI.
       saveTransactionHash(result.certificateId, result.transactionHash);
       savePreview({
         id: result.certificateId,
@@ -203,8 +206,13 @@ export function Register() {
         dataUrl: previewDataUrl
       });
 
-      const record = await copyright.getCopyright(result.certificateId);
-      saveLocalRecord({ ...record, transactionHash: result.transactionHash });
+      try {
+        const record = await copyright.getCopyright(result.certificateId);
+        saveLocalRecord({ ...record, transactionHash: result.transactionHash });
+      } catch {
+        // The certificate page can read the confirmed record again from RPC.
+      }
+
       setSuccessId(result.certificateId);
       setModalOpen(false);
       navigate(`/certificate/${formatCertificateId(result.certificateId)}`);
