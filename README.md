@@ -2,6 +2,8 @@
 
 **English** | [中文](README.zh-CN.md)
 
+![React 18](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black) ![TypeScript 5.7](https://img.shields.io/badge/TypeScript-5.7-3178C6?logo=typescript&logoColor=white) ![Solidity 0.8.20](https://img.shields.io/badge/Solidity-0.8.20-363636?logo=solidity&logoColor=white) ![Monad Testnet](https://img.shields.io/badge/Monad-Testnet-836EF9?logoColor=white) ![Supabase](https://img.shields.io/badge/Supabase-Review_Queue-3FCF8E?logo=supabase&logoColor=white) ![Vercel](https://img.shields.io/badge/Deploy-Vercel-000000?logo=vercel&logoColor=white)
+
 Public demo: https://copyrightchain-public.vercel.app/
 
 CopyrightChain is a university Web3 mini demo for blockchain-based digital copyright registration on Monad Testnet.
